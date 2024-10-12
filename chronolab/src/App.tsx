@@ -15,6 +15,9 @@ import {
   MediaMuteButton,
 } from 'media-chrome/react';
 
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+
+
 function App() {
   const [videoSrc, setVideoSrc] = useState("");
   const [csvPath, setCSVPath] = useState("");
@@ -43,6 +46,22 @@ function App() {
       invoke('scan_csv', { path: file }).then((summary) => console.log(summary));
     }
   }
+
+
+  async function createNewWindow() {
+    const webview = new WebviewWindow('my-label', {
+      url: '/app-windows/plot-window.html'
+    });
+    // since the webview window is created asynchronously,
+    // Tauri emits the `tauri://created` and `tauri://error` to notify you of the creation response
+    webview.once('tauri://created', function () {
+      console.log("Window Created")
+    })
+    webview.once('tauri://error', function (e: any)  {
+      (console.log(e))
+    })
+  }
+  
 
 
   return (
@@ -86,6 +105,8 @@ function App() {
       >
         <button type="submit">Select CSV File</button>
       </form>
+
+      <button onClick={createNewWindow}>Open Plot</button>
 
     </div>
   );
