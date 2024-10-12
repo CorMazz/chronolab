@@ -1,5 +1,4 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
@@ -18,8 +17,9 @@ import {
 
 function App() {
   const [videoSrc, setVideoSrc] = useState("");
+  const [csvPath, setCSVPath] = useState("");
   
-  async function openFile() {
+  async function selectVideoFile() {
     const file = await open({
       multiple: false,
       directory: false,
@@ -29,11 +29,24 @@ function App() {
     }
   }
 
+  /**
+   * Loads a CSV file using Polars on the backend.
+   */
+  async function selectCSVFile() {
+    const file = await open({
+      multiple: false,
+      directory: false,
+    });
+    if (file) {
+      setCSVPath(file);
+      console.log(csvPath);
+      invoke('scan_csv', { path: file }).then((summary) => console.log(summary));
+    }
+  }
+
 
   return (
     <div className="container">
-
-
 
       <MediaController>
         <video
@@ -58,11 +71,22 @@ function App() {
         className="row"
         onSubmit={(e) => {
           e.preventDefault();
-          openFile();
+          selectVideoFile();
         }}
       >
         <button type="submit">Open Video</button>
       </form>
+
+      <form
+        className="row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          selectCSVFile();
+        }}
+      >
+        <button type="submit">Select CSV File</button>
+      </form>
+
     </div>
   );
 }

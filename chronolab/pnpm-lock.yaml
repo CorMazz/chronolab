@@ -20,6 +20,9 @@ importers:
       media-chrome:
         specifier: ^4.2.1
         version: 4.2.1
+      plotly.js-dist:
+        specifier: ^2.35.2
+        version: 2.35.2
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -586,6 +589,9 @@ packages:
   picocolors@1.1.0:
     resolution: {integrity: sha512-TQ92mBOW0l3LeMeyLV6mzy/kWr8lkd/hp3mTg7wYK7zJhuBStmGMBG0BdeDZS/dZx1IukaX6Bk11zcln25o1Aw==}
 
+  plotly.js-dist@2.35.2:
+    resolution: {integrity: sha512-zbKfz7jXGcLGoyPJxjGrKLttPiqvsEjIMHON/dEU/mnOJ+/yYoEctEEQ3qp5zQmvoovw1L47kCsQpq/GTbejBA==}
+
   postcss@8.4.47:
     resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -1132,6 +1138,8 @@ snapshots:
   node-releases@2.0.18: {}
 
   picocolors@1.1.0: {}
+
+  plotly.js-dist@2.35.2: {}
 
   postcss@8.4.47:
     dependencies:

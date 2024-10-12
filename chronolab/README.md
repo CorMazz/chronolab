@@ -17,7 +17,11 @@ This template should help get you started developing with Tauri, React and Types
 4. Rust backend video editing
    1. Load in separate video files and determine how to combine them and position them based on user GUI input
    2. Save the combined videos + data as a single video
+5. Add tsdownsample to downsample large traces and allow for quicker data visualization.
 
 ## TODO
+
+1. Use an [array buffer](https://v2.tauri.app/develop/calling-rust/#returning-array-buffers) to transfer data to the frontend from Polars when requested
+2. Add the -performance feature to Polars to make it faster (at the expense of compile time)
 
 ## Last Thing I Was Working On
