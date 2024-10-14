@@ -1,10 +1,6 @@
-# Tauri + React + Typescript
+# Chronolab
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Chronolab is an application that is designed to allow for visualization of lab video and lab data concurrently, as if you were in the lab live, day-of, watching video and data stream in on your screens.
 
 ## Design Decisions
 
@@ -24,6 +20,7 @@ Given the added complexity of having the backend handle all the data, it makes m
    1. Load in separate video files and determine how to combine them and position them based on user GUI input
    2. Save the combined videos + data as a single video
 5. Add tsdownsample to downsample large traces and allow for quicker data visualization.
+6. Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).
 
 ## TODO
 

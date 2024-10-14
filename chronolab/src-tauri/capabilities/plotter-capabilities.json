@@ -1,0 +1,11 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "plot-window",
+    "description": "Capability for the plot window",
+    "windows": [
+      "plot-window"
+    ],
+    "permissions": [
+      "core:default"
+    ]
+  }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
@@ -19,8 +19,10 @@ import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 
 function App() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoSrc, setVideoSrc] = useState("");
   const [csvPath, setCSVPath] = useState("");
+  const [lastTime, setLastTime] = useState<number | null>(null);
   
   async function selectVideoFile() {
     const file = await open({
@@ -49,7 +51,7 @@ function App() {
 
 
   async function createNewWindow() {
-    const webview = new WebviewWindow('my-label', {
+    const webview = new WebviewWindow('plot-window', {
       url: '/app-windows/plot-window.html'
     });
     // since the webview window is created asynchronously,
@@ -61,6 +63,26 @@ function App() {
       (console.log(e))
     })
   }
+
+    // Polling function
+    useEffect(() => {
+      const interval = setInterval(() => {
+        if (videoRef.current) {
+          const currentTime = videoRef.current.currentTime; // Get the current time
+  
+          // Check if current time has changed
+          if (lastTime !== currentTime) {
+            setLastTime(currentTime); // Update last time
+            console.log(`Current Time: ${currentTime}`); // Log for debugging
+  
+            // Send current time to backend
+            invoke('emit_video_time_change', { videoTime: currentTime });
+          }
+        }
+      }, 500); // Poll every 500 milliseconds
+  
+      return () => clearInterval(interval); // Cleanup on component unmount
+    }, [lastTime]);
   
 
 
@@ -69,6 +91,7 @@ function App() {
 
       <MediaController>
         <video
+          ref={videoRef}
           slot="media"
           src={videoSrc}
           preload="auto"

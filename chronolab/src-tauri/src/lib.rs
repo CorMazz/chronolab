@@ -1,8 +1,10 @@
 mod dataframe_handlers;
+mod video_handlers;
 
 use std::sync::Mutex;
 use tauri::Manager;
-use crate::dataframe_handlers::{scan_csv, get_csv_data};
+use video_handlers::emit_video_time_change;
+use dataframe_handlers::{scan_csv, get_csv_data};
 
 
 #[derive(Default)]
@@ -19,7 +21,7 @@ pub fn run() {
     })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![scan_csv, get_csv_data])
+        .invoke_handler(tauri::generate_handler![scan_csv, get_csv_data, emit_video_time_change])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

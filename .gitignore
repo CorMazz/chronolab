@@ -12,3 +12,4 @@ Cargo.lock
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
+test_datasets/2021-05-09 18-51-55.mkv
