@@ -2,6 +2,10 @@
 
 Chronolab is an application that is designed to allow for visualization of lab video and lab data concurrently, as if you were in the lab live, day-of, watching video and data stream in on your screens.
 
+## Proof-Of-Concept
+
+The proof-of-concept release on GitHub works in the dev mode on Windows. You need to select the uneditted example dataset, and any random video. Start the dev build with `pnpm tauri dev`, click `load video` and select a video, click `load csv` and select a csv file, then open the plot. Press play on the video and the plot should move as the time in the video moves.
+
 ## Design Decisions
 
 ### Frontend vs. Backend CSV Data Handling
@@ -23,13 +27,13 @@ Given the added complexity of having the backend handle all the data, it makes m
 6. **Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).**
 7. **Automatic video start time parsing**
    1. Search for anything resembling a datetime string in the video file name and use that as the video start time.
-8. 
 
 ## TODO
 
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)
 2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
+3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
 
 ## Last Thing I Was Working On
 
-Have the plot change it's x-axis based on the current time of the video.
+Plot now moves with the data. Now start adding settings to fix all the stuff I hardcoded to get this proof-of-concept working.
