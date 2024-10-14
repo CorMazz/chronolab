@@ -10,21 +10,25 @@ Given the added complexity of having the backend handle all the data, it makes m
 
 ## Potential Features
 
-1. Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)
-2. IOI Noting
+1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
+2. **IOI Noting**
    1. Have a dialog on the right side that allows the user to note items of interest and add a name/description of the event
    2. Allow the user to rapidly seek to that time in the event
-3. Video Section Labeling
+3. **Video Section Labeling**
    1. Like how on YouTube you can hover over the video time bar and it will tell you what different sections there are
-4. Rust backend video editing
+4. **Rust backend video editing**
    1. Load in separate video files and determine how to combine them and position them based on user GUI input
    2. Save the combined videos + data as a single video
-5. Add tsdownsample to downsample large traces and allow for quicker data visualization.
-6. Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).
+5. **Add tsdownsample to downsample large traces and allow for quicker data visualization.**
+6. **Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).**
+7. **Automatic video start time parsing**
+   1. Search for anything resembling a datetime string in the video file name and use that as the video start time.
+8. 
 
 ## TODO
 
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)
+2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
 
 ## Last Thing I Was Working On
 
