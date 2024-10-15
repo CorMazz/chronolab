@@ -16,6 +16,10 @@ Given the added complexity of having the backend handle all the data, it makes m
 
 Following the principle of One Absolute Truth (OAT), I am going to design this such that the application state is maintained in the Rust backend and the React frontend sets up event listeners for state change. This will enable easier development of future save functionality, since I can serialize the Rust AppState struct, save it to a file, and then reload that to restart the app with the same settings that the user previously had. This will also limit potential mismatched state between the frontend and the backend, hopefully limiting bugs. This might take more developer effort though, since I am essentially bypassing React's state management.
 
+#### Architecture
+
+This was implemented on the backend in the `/src-tauri/src/global_state.rs` file with a Rust struct and on the frontend in the `/src/hooks/useGlobalState.ts` file using a custom React hook. The custom React hook returns wrapped versions of standard React state modifying functions that first update the global state contained in the `global_state.rs` file, and then update the local state from the standard `useState()` React hook. The custom React hook also has a `useEffect` which places a listener on the container component that listens for the global events emitted by `global_state.rs` which indicate that a specific part of the global state has changed.
+
 ## Potential Features
 
 1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
@@ -37,9 +41,11 @@ Following the principle of One Absolute Truth (OAT), I am going to design this s
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)
 2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
 3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
+4. Add Tailwind and start making this thing pretty.
 
 ## Last Thing I Was Working On
 
-Plot now moves with the data. Now start adding settings to fix all the stuff I hardcoded to get this proof-of-concept working.
+Global state and refactoring has now been successfully implemented. Now it is time to start expanding on the plot state by adding more user fed details about the DataFrame to load, such as what the time column is, if the time column is sorted, what other columns we want to load and plot, etc.
 
-Last thing I was doing is reorganizing the React frontend into separate components, with a controller component that is the main component which can set state. Following the principle of One Absolute Truth (OAT), I am going to have the state completely stored in the backend, that way it should be simple in the future to serialize the application state and write it to a file to provide "save" functionality.
+Pretty soon it is time to add tailwind and make this thing pretty.
+

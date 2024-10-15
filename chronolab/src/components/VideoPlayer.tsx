@@ -23,7 +23,8 @@ function VideoPlayer() {
   /**
    * Setup a polling function to continuously broadcast the video time to the whole application.
    * Invokes a backend Rust function which uses a global emitter whose payload is the current video time,
-   * in seconds from the start of the video (0 sec is the start). 
+   * in seconds from the start of the video (0 sec is the start). This is not kept track of as part of global 
+   * state.
    */
   useEffect(() => {
     const interval = setInterval(() => {
