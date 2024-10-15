@@ -2,18 +2,24 @@ use std::sync::Mutex;
 use polars::prelude::*;
 use polars::io::ipc::IpcWriter;
 use tauri::{ipc::Response, State};
+use crate::global_state::AppState;
 
-use crate::AppState;
 
 #[tauri::command]
-pub async fn scan_csv(path: String, state: State<'_, Mutex<AppState>>) -> Result<String, String> {
+pub async fn scan_csv(state: State<'_, Mutex<AppState>>) -> Result<String, String> {
+
+    let state = state
+        .lock()
+        .map_err(|e| format!("Error locking app state when loading data: {}", e.to_string()))?;
+
+    let file_path= state.csv_file_path.clone().ok_or("CSV file path has not been set yet")?;
 
     let datetime_formatter = StrptimeOptions {
         format: Some("%Y-%m-%d %H:%M:%S%z".into()),
         ..Default::default()
     };
 
-    let lf = LazyCsvReader::new(path)
+    let lf = LazyCsvReader::new(file_path)
         .finish()
         .map_err(|e| format!("Error opening file: {}", e.to_string()))?
         .with_columns([col("timestamp")
@@ -25,11 +31,6 @@ pub async fn scan_csv(path: String, state: State<'_, Mutex<AppState>>) -> Result
                 lit("raise")
             )
             .alias("timestamp")]); 
-
-    let mut state =state
-        .lock()
-        .map_err(|e| format!("Error modifying app state when loading data: {}", e.to_string()))?;
-    state.lazyframe = Some(lf.clone());
 
     let df = lf
         .fetch(5)
@@ -60,10 +61,28 @@ pub async fn get_csv_data(state: State<'_, Mutex<AppState>>) -> Result<Response,
         .lock()
         .map_err(|e| format!("Error getting app state when requesting data: {}", e.to_string()))?;
 
-    let mut df = match state.lazyframe.clone() {
-        Some(lf) => lf.fetch(1000),
-        None => return Err("No CSV file has been loaded yet.".into()),
-    }.map_err(|e| format!("Error collecting CSV data: {}", e.to_string()))?;
+    let file_path= state.csv_file_path.clone().ok_or("CSV file path has not been set yet")?;
+
+    let datetime_formatter = StrptimeOptions {
+        format: Some("%Y-%m-%d %H:%M:%S%z".into()),
+        ..Default::default()
+    };
+
+    let lf = LazyCsvReader::new(file_path)
+        .finish()
+        .map_err(|e| format!("Error opening file: {}", e.to_string()))?
+        .with_columns([col("timestamp")
+            .str()
+            .to_datetime(
+                Some(TimeUnit::Milliseconds),
+                None,
+                datetime_formatter,
+                lit("raise")
+            )
+            .alias("timestamp")]); 
+
+    let mut df = lf.fetch(1000)
+        .map_err(|e| format!("Error collecting CSV data: {}", e.to_string()))?;
 
     // Create a cursor to store the serialized data
     let mut buffer = Vec::new();

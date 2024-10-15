@@ -73,10 +73,6 @@ function Plotter() {
     }))
   }
 
-  async function logLayout() {
-    console.log(layout)
-  }
-
   const handleRelayout = (eventData: any) => {
     console.log(eventData);
   };
