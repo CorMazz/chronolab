@@ -6,7 +6,8 @@ use crate::global_state::AppState;
 
 
 #[tauri::command]
-pub async fn scan_csv(state: State<'_, Mutex<AppState>>) -> Result<String, String> {
+/// Scan the CSV to get some information about it
+pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<String, String> {
 
     let state = state
         .lock()
@@ -14,42 +15,17 @@ pub async fn scan_csv(state: State<'_, Mutex<AppState>>) -> Result<String, Strin
 
     let file_path= state.csv_file_path.clone().ok_or("CSV file path has not been set yet")?;
 
-    let datetime_formatter = StrptimeOptions {
-        format: Some("%Y-%m-%d %H:%M:%S%z".into()),
-        ..Default::default()
-    };
-
-    let lf = LazyCsvReader::new(file_path)
+    let mut lf = LazyCsvReader::new(file_path)
         .finish()
-        .map_err(|e| format!("Error opening file: {}", e.to_string()))?
-        .with_columns([col("timestamp")
-            .str()
-            .to_datetime(
-                Some(TimeUnit::Milliseconds),
-                None,
-                datetime_formatter,
-                lit("raise")
-            )
-            .alias("timestamp")]); 
+        .map_err(|e| format!("Error opening file: {}", e.to_string()))?;
 
-    let df = lf
-        .fetch(5)
-        .map_err(|e| format!("Error collecting CSV data: {}", e.to_string()))?;
+    let schema = lf
+        .collect_schema()
+        .map_err(|e| format!("Error getting CSV schema: {}", e.to_string()))?;
 
-    // let df = CsvReadOptions::default()
-    //     .map_parse_options(|parse_options| parse_options.with_try_parse_dates(true))
-    //     .try_into_reader_with_file_path(Some(path.into()))
-    //     .map_err(|e| format!("Error opening file: {}", e.to_string()))?
-    //     .finish()
-    //     .map_err(|e| format!("Error reading CSV data: {}", e.to_string()))?;
+    println!("{:#?}", schema);
 
-    Ok(format!(
-        "DataFrame Summary:\nColumns: {:?}\nData Types: {:?}\nHead:\n{}",
-        df.get_column_names(),
-        df.dtypes(),
-        df.head(Some(5)) // First 5 rows
-    ))
-    
+    Ok("".to_string())
 }
 
 

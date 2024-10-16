@@ -43,10 +43,16 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
 4. Add Tailwind and start making this thing pretty.
 5. Set isMultiwindow to false when the second window closes.
+6. Determine if I need to switch the state to RwLock instead of Mutex
 
 ## Last Thing I Was Working On
 
-Global state and refactoring has now been successfully implemented. Now it is time to start expanding on the plot state by adding more user fed details about the DataFrame to load, such as what the time column is, if the time column is sorted, what other columns we want to load and plot, etc.
+Global state and refactoring has now been successfully implemented. Was working on creating the PlotSettings component. Last editing the Rust command to get the .csv schema and print it to rust console. Next, send it to frontend and log it in frontend console.
 
-Pretty soon it is time to add tailwind and make this thing pretty.
+## Misc Notes
 
+Inputs that the Plotter component needs to properly load the DataFrame and create the plot:
+
+1. x-axis column name
+2. y-axis column names
+3. desired date range from file

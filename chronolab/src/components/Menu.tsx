@@ -1,7 +1,13 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import useGlobalState from "../hooks/useGlobalState";
 import { selectCsvFile, selectVideoFile } from '../utils/fileSelectors';
+import { invoke } from '@tauri-apps/api/core';
 
+
+
+/**
+ * The dropdown settings menu for all windows. 
+ */
 function Menu() {
 
     const {setCsvFilePath, setVideoFilePath, setIsMultiwindow} = useGlobalState(
@@ -45,6 +51,7 @@ function Menu() {
 
     return (
         <div id="container">
+            <button onClick={() => invoke( "get_csv_schema" ).then((schema) => console.log(schema))}>Get CSV Schema</button>
             <button onClick={() => selectCsvFile(setCsvFilePath)}>Navbar: Select CSV File</button>
             <button onClick={() => selectVideoFile(setVideoFilePath)}>Navbar: Select Video File</button>
             <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button>
