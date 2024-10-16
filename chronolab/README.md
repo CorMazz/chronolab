@@ -42,6 +42,7 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
 3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
 4. Add Tailwind and start making this thing pretty.
+5. Set isMultiwindow to false when the second window closes.
 
 ## Last Thing I Was Working On
 

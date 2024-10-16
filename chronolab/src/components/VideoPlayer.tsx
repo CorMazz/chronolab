@@ -13,11 +13,12 @@ import {
   MediaMuteButton,
 } from 'media-chrome/react';
 import useGlobalState from "../hooks/useGlobalState";
+import { selectVideoFile } from "../utils/fileSelectors";
 
 function VideoPlayer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [lastTime, setLastTime] = useState<number | null>(null);
-  const {videoFilePath} = useGlobalState();
+  const {videoFilePath, setVideoFilePath} = useGlobalState({videoFile: true});
 
 
   /**
@@ -50,25 +51,30 @@ function VideoPlayer() {
   return (
     <div className="container">
 
-      <MediaController>
-        <video
-          ref={videoRef}
-          slot="media"
-          src={convertFileSrc(videoFilePath)}
-          preload="auto"
-          muted
-          crossOrigin=""
-        />
-        <MediaControlBar>
-          <MediaPlayButton></MediaPlayButton>
-          <MediaSeekBackwardButton></MediaSeekBackwardButton>
-          <MediaSeekForwardButton></MediaSeekForwardButton>
-          <MediaTimeRange></MediaTimeRange>
-          <MediaTimeDisplay showDuration></MediaTimeDisplay>
-          <MediaMuteButton></MediaMuteButton>
-          <MediaVolumeRange></MediaVolumeRange>
-        </MediaControlBar>
-      </MediaController>
+      {videoFilePath ? (
+        <MediaController>
+          <video
+            ref={videoRef}
+            slot="media"
+            src={convertFileSrc(videoFilePath)}
+            preload="auto"
+            muted
+            crossOrigin=""
+          />
+          <MediaControlBar>
+            <MediaPlayButton></MediaPlayButton>
+            <MediaSeekBackwardButton></MediaSeekBackwardButton>
+            <MediaSeekForwardButton></MediaSeekForwardButton>
+            <MediaTimeRange></MediaTimeRange>
+            <MediaTimeDisplay showDuration></MediaTimeDisplay>
+            <MediaMuteButton></MediaMuteButton>
+            <MediaVolumeRange></MediaVolumeRange>
+          </MediaControlBar>
+        </MediaController>
+        ) : (
+          <button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</button>
+        )
+      }
 
     </div>
   );
