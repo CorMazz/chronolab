@@ -6,7 +6,7 @@ use std::sync::Mutex;
 use tauri::Manager;
 use video_handlers::emit_video_time_change;
 use dataframe_handlers::{get_csv_schema, get_csv_data};
-use global_state::{set_app_state, AppState};
+use global_state::{set_app_state, get_app_state, AppState};
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -18,7 +18,7 @@ pub fn run() {
     })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![get_csv_schema, get_csv_data, emit_video_time_change, set_app_state])
+        .invoke_handler(tauri::generate_handler![get_csv_schema, get_csv_data, emit_video_time_change, set_app_state, get_app_state])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

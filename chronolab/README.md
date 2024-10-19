@@ -44,15 +44,9 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 4. Add Tailwind and start making this thing pretty.
 5. Set isMultiwindow to false when the second window closes.
 6. Determine if I need to switch the state to RwLock instead of Mutex
+7. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
+8. Let the user pull up the plot settings menu again.
 
 ## Last Thing I Was Working On
 
-Global state and refactoring has now been successfully implemented. Was working on creating the PlotSettings component. Last editing the Rust command to get the .csv schema and print it to rust console. Next, send it to frontend and log it in frontend console.
-
-## Misc Notes
-
-Inputs that the Plotter component needs to properly load the DataFrame and create the plot:
-
-1. x-axis column name
-2. y-axis column names
-3. desired date range from file
+Got the plot to load in more than 1 column, but it looks like the data is whack. Check that out, then get the plot to follow the video again and you're halfway done. 

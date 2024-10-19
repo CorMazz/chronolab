@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';
 import {Table, tableFromIPC} from "apache-arrow";
+import useGlobalState, { LoadCsvSettings } from '../hooks/useGlobalState';
+import { Data } from 'plotly.js';
 
 function Plotter() {
-  const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
-  const [plotData, setPlotData] = useState<Table | null>(null);
+  const { loadCsvSettings, videoStartTime } = useGlobalState({loadCsvSettings: true, videoStartTime: true})
+  const [csvTable, setCsvTable] = useState<Table | null>(null);
+  const [plotData, setPlotData] = useState<Data[] | null>(null);
   const [layout, setLayout] = useState({
     width: 640,
     height: 480,
@@ -21,27 +24,45 @@ function Plotter() {
     // Get the Apache Arrow IPC serialized formatted CSV data from the Rust backend
     async function fetchData() {
       try {
-        const parsedData = tableFromIPC(await invoke('get_csv_data'));
-        console.log("Parsed Data");
-        setPlotData(parsedData);
-      } catch (error) {
-        console.error('Error fetching CSV data:', error);
-      }
-    }
+        if (loadCsvSettings) {
+          const parsedData = tableFromIPC(await invoke('get_csv_data'));
+          console.log("Parsed Data");
+          setCsvTable(parsedData);
 
+          // Extracting the first column as x (timestamps) and subsequent columns as y (data series)
+          const x = Array.from(parsedData.getChild(loadCsvSettings?.datetime_index_col)?.toArray() ?? [], ts => new Date(Number(ts)));
+              
+          // Create an array of traces for each subsequent column in the csvTable
+          const newPlotData = parsedData.schema.fields.slice(1).map(field => {
+            const y = parsedData.getChild(field.name)?.toArray() ?? [];
+            return {
+              x: x,
+              y: y,
+              type: 'scatter',
+              mode: 'lines+markers',
+              name: field.name, // Use field name as the trace name
+            } as Data;
+          });
+
+        setPlotData(newPlotData); // Set the plot data after extraction
+      }
+      } catch (error) {
+      console.error('Error fetching CSV data:', error);
+      }
+      }
+    
     fetchData();
 
-    const temp = plotData?.getChild('timestamp')?.toArray() ?? []
-    setVideoStartTime(new Date(Number(temp[0])));
 
     // Set up the event listener for video time changes, ensuring it only runs once
     const unlisten = listen<number>('video-time-change', (event) => {
+      if (!videoStartTime) return;
       console.log(
         `Video time is now ${event.payload} seconds from the beginning.`
       );
       console.log(event);
 
-      setAxesRange(add_seconds(new Date(Number(temp[0])), -10 + event.payload), add_seconds(new Date(Number(temp[0])), 10 + event.payload))
+      setAxesRange(add_seconds(videoStartTime, -10 + event.payload), add_seconds(videoStartTime, 10 + event.payload))
 
     });
 
@@ -49,12 +70,11 @@ function Plotter() {
     return () => {
       unlisten.then((dispose) => dispose());
     };
-  }, []); 
-  if (!plotData) return <div>Loading...</div>;
+  }, [loadCsvSettings]); 
 
   // https://stackoverflow.com/questions/77598389/how-to-access-arrow-data-in-js
-  const x = plotData.getChild('timestamp')?.toArray() ?? []; 
-  const y = plotData.getChild('power')?.toArray() ?? [];
+  // const x = plotData.getChild('timestamp')?.toArray() ?? []; 
+  // const y = plotData.getChild('power')?.toArray() ?? [];
 
   async function setAxesRange(start: Date, end: Date) {
     console.log("Called setAxesRange");
@@ -85,21 +105,15 @@ function Plotter() {
     return new Date(date.getTime() + seconds * 1000)
   }
 
+    if (!csvTable) return <div>Loading...</div>;
+
     return (
       <div className="container">
-      <Plot
-        data={[
-          {
-            x: Array.from(x, ts => new Date(Number(ts))),
-            y: y,
-            type: 'scatter',
-            mode: 'lines+markers',
-            marker: { color: 'red' },
-          },
-        ]}
+        {plotData && <Plot
+        data={plotData}
         layout={layout}
         onRelayout={handleRelayout}
-      />
+      />}
     </div>
     );
   }

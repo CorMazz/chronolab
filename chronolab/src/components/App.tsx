@@ -1,12 +1,15 @@
 import Menu from './Menu';
 import VideoPlayer from './VideoPlayer';
-import Plotter from './Plotter';
 import useGlobalState from '../hooks/useGlobalState';
+import PlotSettings from './PlotSettings';
+import Plotter from './Plotter';
+// import Plotter from './Plotter';
 
 function App() {
 
-  const {isMultiwindow} = useGlobalState({
+  const {isMultiwindow, loadCsvSettings} = useGlobalState({
     csvFile: false,
+    loadCsvSettings: true,
     videoFile: false,
     isMultiwindow: true,
 });
@@ -15,7 +18,7 @@ function App() {
     <div>
       <Menu/>
       <VideoPlayer/>
-      {!isMultiwindow && <Plotter/>}
+      {!isMultiwindow && (loadCsvSettings ? <Plotter/> : <PlotSettings/>)}
     </div>
   );
 }

@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
     "@tauri-apps/api": ">=2.0.0",
     "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-shell": ">=2.0.0",
@@ -18,7 +19,9 @@
     "plotly.js": "^2.35.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-plotly.js": "^2.6.0"
+    "react-hook-form": "^7.53.1",
+    "react-plotly.js": "^2.6.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tauri-apps/cli": ">=2.0.0",
