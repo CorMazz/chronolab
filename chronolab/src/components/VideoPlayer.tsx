@@ -23,7 +23,7 @@ import { parseJSON } from "date-fns";
 const videoStartTimeFormInputs = z.object({
     video_start_time: z.preprocess(
       // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
-      (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+      (val) => (val == null || val === "" )  ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
       z.date().nullable()
   ),
 })
@@ -34,9 +34,15 @@ type VideoStartTimeFormInputs = z.infer<typeof videoStartTimeFormInputs>;
 // Child Component
 // ##############################################################################################################
 
-function VideoStartTimeForm() {
-    const { handleSubmit, register, formState: { errors } } = useForm<VideoStartTimeFormInputs>({resolver: zodResolver(videoStartTimeFormInputs)});
-    const { setVideoStartTime } = useGlobalState({videoStartTime: true, setOnly: true});
+export function VideoStartTimeForm() {
+    const { videoStartTime, setVideoStartTime } = useGlobalState({videoStartTime: true, setOnly: false});
+
+    const { handleSubmit, register, formState: { errors } } = useForm<VideoStartTimeFormInputs>(
+      {
+        resolver: zodResolver(videoStartTimeFormInputs),
+        defaultValues: { video_start_time: videoStartTime }
+      }
+    );
 
     const onFormSubmit = (data: VideoStartTimeFormInputs) => {
       console.log("Video Start Time Form Submission Data:")

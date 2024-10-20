@@ -51,6 +51,10 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 7. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
 8. Let the user pull up the plot settings menu again.
 
+## Bugs
+
+1. Show video start time default value does not persist.
+
 ## Last Thing I Was Working On
 
-Video following now works. Next, refactor the PlotSettings component to be completely independent of the Plotter component and enable reuse of that component by the Menu component so that users can change their settings after they've loaded the data. Same for the VideoPlayerForm component. I'm tired of having to completely reset this thing to modify the global state. 
+Just got the plot settings and video settings windows to show from the plot. Time to add styling to this.

@@ -2,6 +2,9 @@ import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import useGlobalState from "../hooks/useGlobalState";
 import { selectCsvFile, selectVideoFile } from '../utils/fileSelectors';
 import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
+import PlotSettings from './PlotSettings';
+import { VideoStartTimeForm } from './VideoPlayer';
 
 
 
@@ -13,6 +16,9 @@ function Menu() {
     const {setCsvFilePath, setVideoFilePath, setIsMultiwindow} = useGlobalState(
         {csvFile: true, videoFile: true, isMultiwindow: true, setOnly: true}
     );
+    const [showPlotSettings, setShowPlotSettings] = useState(false);
+    const [showVideoSettings, setShowVideoSettings] = useState(false);
+
 
     /**
      * Let the user decide if they want to open the plot in a separate window.
@@ -49,12 +55,31 @@ function Menu() {
         // });
     }
 
+    /**
+     * Toggle the visibility of the PlotSettings component.
+     */
+    const togglePlotSettings = () => {
+        setShowPlotSettings(prevState => !prevState);
+    }
+
+    /**
+     * Toggle the visibility of the PlotSettings component.
+     */
+    const toggleVideoSettings = () => {
+        setShowVideoSettings(prevState => !prevState);
+    }
+
     return (
         <div id="container">
             <button onClick={() => invoke( "get_csv_schema" ).then((schema) => console.log(schema))}>Get CSV Schema</button>
             <button onClick={() => selectCsvFile(setCsvFilePath)}>Navbar: Select CSV File</button>
             <button onClick={() => selectVideoFile(setVideoFilePath)}>Navbar: Select Video File</button>
-            <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button>
+            {/* <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button> */}
+            <button onClick={togglePlotSettings}>{showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}</button>
+                {showPlotSettings && <PlotSettings />}
+            <button onClick={toggleVideoSettings}>{showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}</button>
+                {showVideoSettings && <VideoStartTimeForm />}
+            
         </div>
     )
 }

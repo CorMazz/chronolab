@@ -82,9 +82,6 @@ pub async fn set_app_state<'a>(
     let mut app_state= state.lock().unwrap();
     let update_event_name: &str;
 
-    println!("{:#?}", field.clone());
-    println!("{:#?}", field_value.clone());
-
     match field.as_str() {
         "csvFilePath" => {
             let value: Option<SafePathBuf> = serde_json::from_value(field_value.clone())
@@ -128,9 +125,6 @@ pub async fn set_app_state<'a>(
 
     app.emit(&format!("state-change--{}", update_event_name), field_value)
         .map_err(|err| format!("Function set_app_state in global_state.rs -- failed to emit state update event for {}: {}", update_event_name, err))?;
-
-    println!("\n\nLoad CSV Settings");
-    println!("{:?}", app_state.load_csv_settings);
 
     Ok(())
 }

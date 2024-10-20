@@ -12,9 +12,10 @@ interface DataFrameColumn {
     field_type: string;
 }
 
-interface DataFrameSchema {
+interface PlotSettingsFormSchema {
     columns: DataFrameColumn[];
     onSubmit: (data: LoadCsvSettings) => void;
+    currentSettings: LoadCsvSettings | null;
 }
 
 // This is used to validate the form inputs
@@ -25,13 +26,13 @@ const plotSettingsFormInputs = z.object({
     // For start_time and end_time, convert empty strings to null since the html datetime input gives an empty string for no input
     start_time: z.preprocess(
         // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
-        (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+        (val) => (val == null || val === "" ) ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
         z.date().nullable()
     ),
     
     end_time: z.preprocess(
         // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
-        (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+        (val) => (val == null || val === "" )  ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
         z.date().nullable()
     ),
 }).refine((data) => {
@@ -57,8 +58,17 @@ type PlotSettingsFormInputs = z.infer<typeof plotSettingsFormInputs>;
 // Child Component
 // ##############################################################################################################
 
-function PlotSettingsForm({ columns, onSubmit }: DataFrameSchema) {
-    const { handleSubmit, register, formState: { errors } } = useForm<PlotSettingsFormInputs>({resolver: zodResolver(plotSettingsFormInputs)});
+function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFormSchema) {
+    const { handleSubmit, register, formState: { errors } } = useForm<PlotSettingsFormInputs>({
+        resolver: zodResolver(plotSettingsFormInputs),
+        defaultValues: {
+            load_cols: currentSettings?.load_cols,
+            datetime_index_col: currentSettings?.datetime_index_col,
+            datetime_parsing_format_string: (currentSettings?.datetime_parsing_format_string) ?? "%Y-%m-%d %H:%M:%S",
+            start_time: currentSettings?.time_bounds?.start_time ?? null,
+            end_time: currentSettings?.time_bounds?.end_time ?? null,
+        }
+    });
 
     const onFormSubmit = (data: PlotSettingsFormInputs) => {
 
@@ -87,6 +97,7 @@ function PlotSettingsForm({ columns, onSubmit }: DataFrameSchema) {
                         type="checkbox"
                         id={column.name}
                         value={column.name}
+                        defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
                         {...register("load_cols")}              
                     />
                     <label htmlFor={column.name}>{`${column.name} (${column.field_type})`}</label>
@@ -111,7 +122,6 @@ function PlotSettingsForm({ columns, onSubmit }: DataFrameSchema) {
                 <label htmlFor="datetime_parsing_format_string">Datetime Parsing Format</label>
                 <input
                     id="datetime_parsing_format_string"
-                    defaultValue="%Y-%m-%d %H:%M:%S"
                     {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
                 />
                 {errors.datetime_parsing_format_string && <p>{errors.datetime_parsing_format_string.message}</p>}
@@ -150,7 +160,7 @@ function PlotSettingsForm({ columns, onSubmit }: DataFrameSchema) {
 // ##############################################################################################################
 
 function PlotSettings() {
-    const { setLoadCsvSettings } = useGlobalState({ loadCsvSettings: true, setOnly: true })
+    const { loadCsvSettings, setLoadCsvSettings } = useGlobalState({ loadCsvSettings: true, setOnly: false })
     const { csvFilePath } = useGlobalState({ csvFile: true })
     const [columns, setColumns] = useState<DataFrameColumn[] | undefined>(undefined);
 
@@ -186,7 +196,7 @@ function PlotSettings() {
             {columns === undefined ? null : columns.length === 0 ? (
                 <p>No columns available to select. Was this CSV file formatted correctly?</p>
             ) : (
-                <PlotSettingsForm columns={columns} onSubmit={handleFormSubmit} />
+                <PlotSettingsForm columns={columns} onSubmit={handleFormSubmit} currentSettings={loadCsvSettings ?? null} />
             )}
             </div>
     );

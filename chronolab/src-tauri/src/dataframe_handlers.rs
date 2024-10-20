@@ -92,9 +92,6 @@ pub async fn get_csv_data(state: State<'_, Mutex<AppState>>) -> Result<Response,
     // Filter the time to fit within the bounds, if supplied
     if let Some(time_bounds) = load_csv_settings.time_bounds {
         if let Some(start_time) = time_bounds.start_time {
-            println!("Start Time: {}", start_time);
-            println!("LF First Row: {:#?}", lf.clone().fetch(1));
-
             lf = lf.filter(
                 col(&load_csv_settings.datetime_index_col)
                     .gt_eq(lit(start_time))
