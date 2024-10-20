@@ -1,13 +1,15 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';
-import {Table, tableFromIPC} from "apache-arrow";
-import useGlobalState, { LoadCsvSettings } from '../hooks/useGlobalState';
+import { Table, tableFromIPC } from "apache-arrow";
+import useGlobalState from '../hooks/useGlobalState';
 import { Data } from 'plotly.js';
+import { toDate } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 function Plotter() {
-  const { loadCsvSettings, videoStartTime } = useGlobalState({loadCsvSettings: true, videoStartTime: true})
+  const { loadCsvSettings, videoStartTime } = useGlobalState({ loadCsvSettings: true, videoStartTime: true });
   const [csvTable, setCsvTable] = useState<Table | null>(null);
   const [plotData, setPlotData] = useState<Data[] | null>(null);
   const [layout, setLayout] = useState({
@@ -20,7 +22,6 @@ function Plotter() {
   });
 
   useEffect(() => {
-
     // Get the Apache Arrow IPC serialized formatted CSV data from the Rust backend
     async function fetchData() {
       try {
@@ -30,8 +31,9 @@ function Plotter() {
           setCsvTable(parsedData);
 
           // Extracting the first column as x (timestamps) and subsequent columns as y (data series)
-          const x = Array.from(parsedData.getChild(loadCsvSettings?.datetime_index_col)?.toArray() ?? [], ts => new Date(Number(ts)));
-              
+          // The toZonedTime BS is to get the time to display as correct and not shift it to our time zone.
+          const x = Array.from(parsedData.getChild(loadCsvSettings?.datetime_index_col)?.toArray() ?? [], ts => toZonedTime(toDate(Number(ts)), "UTC"));
+          
           // Create an array of traces for each subsequent column in the csvTable
           const newPlotData = parsedData.schema.fields.slice(1).map(field => {
             const y = parsedData.getChild(field.name)?.toArray() ?? [];
@@ -44,79 +46,96 @@ function Plotter() {
             } as Data;
           });
 
-        setPlotData(newPlotData); // Set the plot data after extraction
-      }
+          setPlotData(newPlotData); // Set the plot data after extraction
+        }
       } catch (error) {
-      console.error('Error fetching CSV data:', error);
+        console.error('Error fetching CSV data:', error);
       }
-      }
-    
+    }
+
     fetchData();
+  }, [loadCsvSettings]); // Fetch data only when loadCsvSettings changes
 
+  useEffect(() => {
+    async function setAxesRange(start: Date, end: Date) {
+      console.log("Called setAxesRange");
+      console.log(`Start: ${start} \n End: ${end}`);
+      setLayout((prevLayout) => ({
+        ...prevLayout,
+        xaxis: {
+          ...prevLayout.xaxis,
+          autorange: false,
+          range: [start, end],
+        },
+        transition: {
+          duration: 1000,
+          easing: 'cubic-in-out',
+        },
+      }));
+    }
 
-    // Set up the event listener for video time changes, ensuring it only runs once
-    const unlisten = listen<number>('video-time-change', (event) => {
-      if (!videoStartTime) return;
-      console.log(
-        `Video time is now ${event.payload} seconds from the beginning.`
-      );
-      console.log(event);
+    // Set up the event listener for video time changes
+    async function setupListener() {
+      const unlisten = await listen<number>('video-time-change', (event) => {
+        if (!videoStartTime) {
+          console.log("video-start-time listener event ignored") 
+          return;
+        }
 
-      setAxesRange(add_seconds(videoStartTime, -10 + event.payload), add_seconds(videoStartTime, 10 + event.payload))
+        console.log("Video Time Change Listener Internal Calls:")
+        console.log(`    Video time is now ${event.payload} seconds from the beginning.`);
+        console.log("    videoStartTime:", videoStartTime);
+        console.log("    Event payload -10:", -10 + event.payload);
+        console.log("    Event payload +10:", 10 + event.payload);
+        console.log("    addSeconds -10", addSeconds(videoStartTime, -10 + event.payload))
+        console.log("    addSeconds +10", addSeconds(videoStartTime, 10 + event.payload))
 
-    });
+        setAxesRange(
+          addSeconds(videoStartTime, -10 + event.payload),
+          addSeconds(videoStartTime, 10 + event.payload)
+        );
+      });
 
-    // Clean up the event listener when the component is unmounted
-    return () => {
-      unlisten.then((dispose) => dispose());
-    };
-  }, [loadCsvSettings]); 
+      // Clean up the event listener when the component is unmounted
+      return () => {
+        console.log("video-time-change listener torn down")
+        unlisten(); // Properly clean up listener
+      };
+    }
 
-  // https://stackoverflow.com/questions/77598389/how-to-access-arrow-data-in-js
-  // const x = plotData.getChild('timestamp')?.toArray() ?? []; 
-  // const y = plotData.getChild('power')?.toArray() ?? [];
+    if (videoStartTime) {
+      console.log("Video Time Change Listener Setup")
+      setupListener();
+    }
 
-  async function setAxesRange(start: Date, end: Date) {
-    console.log("Called setAxesRange");
-    console.log(`Start: ${start} \n End: ${end}`);
-    setLayout((prevLayout) => ({
-      ...prevLayout,
-      xaxis: {
-        ...prevLayout.xaxis,
-        autorange: false,
-        range: [start, end],
-      },
-      transition: { // Stop the plot from jumping from one state to the next
-        duration: 1000,
-        easing: 'cubic-in-out', // Easing function for smoothness
-      },
-    }))
-  }
+  }, [videoStartTime]); // Set up listener only when videoStartTime changes
 
   const handleRelayout = (eventData: any) => {
-    console.log(eventData);
+    console.log("Relayout noted:", eventData);
   };
 
-  // Adds seconds to a JS date object. 
-  // https://stackoverflow.com/questions/7687884/add-10-seconds-to-a-date
-  // https://stackoverflow.com/questions/1197928/how-to-add-30-minutes-to-a-javascript-date-object
-  // Decided to not use a standalone library because this is all I need
-  function add_seconds(date: Date, seconds: number) {
-    return new Date(date.getTime() + seconds * 1000)
+  // Adds seconds to a JS date object.
+  function addSeconds(date: Date, seconds: number) {
+    console.log("Called add seconds");
+    console.log("    addSeconds Date:", date);
+    console.log("    typeof date:", typeof(date));
+    console.log("    addSeconds Seconds:", seconds);
+    const newDate = new Date(date.getTime() + seconds * 1000);
+    console.log("    New Date:", newDate)
+    return newDate
   }
 
-    if (!csvTable) return <div>Loading...</div>;
+  if (!csvTable) return <div>Loading...</div>;
 
-    return (
-      <div className="container">
-        {plotData && <Plot
+  return (
+    <div className="container">
+      {plotData && <Plot
         data={plotData}
         layout={layout}
         onRelayout={handleRelayout}
       />}
     </div>
-    );
-  }
-  
-  export default Plotter;
-  
+  );
+}
+
+export default Plotter;

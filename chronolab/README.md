@@ -20,6 +20,10 @@ Following the principle of One Absolute Truth (OAT), I am going to design this s
 
 This was implemented on the backend in the `/src-tauri/src/global_state.rs` file with a Rust struct and on the frontend in the `/src/hooks/useGlobalState.ts` file using a custom React hook. The custom React hook returns wrapped versions of standard React state modifying functions that first update the global state contained in the `global_state.rs` file, and then update the local state from the standard `useState()` React hook. The custom React hook also has a `useEffect` which places a listener on the container component that listens for the global events emitted by `global_state.rs` which indicate that a specific part of the global state has changed.
 
+### TimeZones
+
+On both the backend and the frontend we shall ignore timezones, because I don't want to deal with them and the user probably doesn't either. All datetimes on the backend will be NaiveDateTimes, and on the frontend, timezones will be "naive" in that I will artificially coerce them to UTC using the date-fns-tz library. 
+
 ## Potential Features
 
 1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
@@ -49,4 +53,4 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 
 ## Last Thing I Was Working On
 
-Got the plot to load in more than 1 column, but it looks like the data is whack. Check that out, then get the plot to follow the video again and you're halfway done. 
+Times should be correct. Give that a second look, then get the plot to follow the video.

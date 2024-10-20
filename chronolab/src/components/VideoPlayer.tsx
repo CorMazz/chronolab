@@ -17,12 +17,14 @@ import { selectVideoFile } from "../utils/fileSelectors";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { parseJSON } from "date-fns";
 
 // This is used to validate the form inputs
 const videoStartTimeFormInputs = z.object({
     video_start_time: z.preprocess(
-      (val) => val === "" ? null : val,
-      z.coerce.date().nullable()
+      // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
+      (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+      z.date().nullable()
   ),
 })
 
@@ -37,7 +39,9 @@ function VideoStartTimeForm() {
     const { setVideoStartTime } = useGlobalState({videoStartTime: true, setOnly: true});
 
     const onFormSubmit = (data: VideoStartTimeFormInputs) => {
-      console.log("Video Start Time Type:", typeof(data.video_start_time));
+      console.log("Video Start Time Form Submission Data:")
+      console.log("   Video Start Time:", data.video_start_time);
+      console.log("   Video Start Time Type:", typeof(data.video_start_time));
       if (setVideoStartTime) {
         setVideoStartTime(data.video_start_time)
       } else {
@@ -53,6 +57,7 @@ function VideoStartTimeForm() {
                 <input
                     id="video_start_time"
                     type="datetime-local"
+                    step="1"
                     {...register("video_start_time")}
                 />
                 {errors.video_start_time && <p>{errors.video_start_time.message}</p>}

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import useGlobalState, { LoadCsvSettings } from "../hooks/useGlobalState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseJSON, isAfter } from "date-fns";
 
 // These two are used to create an object from the JSON DataFrame schema sent by the backend
 interface DataFrameColumn {
@@ -23,18 +24,20 @@ const plotSettingsFormInputs = z.object({
     load_cols: z.array(z.string()).nonempty({message: "You must choose at least one column for the y-axis."}),
     // For start_time and end_time, convert empty strings to null since the html datetime input gives an empty string for no input
     start_time: z.preprocess(
-        (val) => val === "" ? null : val,
-        z.coerce.date().nullable()
+        // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
+        (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+        z.date().nullable()
     ),
     
     end_time: z.preprocess(
-        (val) => val === "" ? null : val,
-        z.coerce.date().nullable()
+        // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
+        (val) => val === "" ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
+        z.date().nullable()
     ),
 }).refine((data) => {
     // Ensure that end_time is after start_time, if both are provided
     if (data.start_time && data.end_time) {
-      return data.end_time > data.start_time;
+      return isAfter(data.end_time, data.start_time)
     }
     return true;  // Validation passes if either start_time or end_time is missing
   }, {
@@ -108,7 +111,7 @@ function PlotSettingsForm({ columns, onSubmit }: DataFrameSchema) {
                 <label htmlFor="datetime_parsing_format_string">Datetime Parsing Format</label>
                 <input
                     id="datetime_parsing_format_string"
-                    value="%Y-%m-%d %H:%M:%S%z"
+                    defaultValue="%Y-%m-%d %H:%M:%S"
                     {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
                 />
                 {errors.datetime_parsing_format_string && <p>{errors.datetime_parsing_format_string.message}</p>}

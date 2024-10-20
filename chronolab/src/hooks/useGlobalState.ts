@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { parseJSON } from "date-fns";
 
 // Enable global state for the path of the CSV file
 function useCsvFilePath(setOnly: boolean = false): { 
@@ -8,7 +9,7 @@ function useCsvFilePath(setOnly: boolean = false): {
     setGlobalCsvFilePath: (path: string) => Promise<void>; 
 } {
     const [csvFilePath, setLocalCsvFilePath] = useState<string | undefined>(undefined);
-    console.log("useCsvFilePath called:", csvFilePath);
+    // console.log("useCsvFilePath called:", csvFilePath);
 
     // Fetch global state on mount
     useEffect(() => {
@@ -66,13 +67,14 @@ function useLoadCsvSettings(setOnly: boolean = false): {
     setGlobalLoadCsvSettings: (settings: LoadCsvSettings) => Promise<void>; 
 } {
     const [loadCsvSettings, setLocalLoadCsvSettings] = useState<LoadCsvSettings | undefined>(undefined);
-    console.log("useLoadCsvSettings called:", loadCsvSettings);
+    // console.log("useLoadCsvSettings called:", loadCsvSettings);
 
     // Fetch global state on mount
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
                 const current_global_state = await invoke<LoadCsvSettings>("get_app_state", { field: "loadCsvSettings" });
+                console.log("Current Global useLoadCsvSettings:", current_global_state);
                 setLocalLoadCsvSettings(current_global_state);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -92,7 +94,7 @@ function useLoadCsvSettings(setOnly: boolean = false): {
         if (setOnly) return; // Skip listener setup if only setting state
 
         const unlisten = listen<LoadCsvSettings>("state-change--load-csv-settings", (event) => {
-            console.log("Load csv settings received", event.payload);
+            // console.log("Load csv settings received", event.payload);
             setLocalLoadCsvSettings(event.payload); 
         });
 
@@ -111,7 +113,7 @@ function useVideoFilePath(setOnly: boolean = false): {
     setGlobalVideoFilePath: (path: string) => Promise<void>; 
 } {
     const [videoFilePath, setLocalVideoFilePath] = useState<string | undefined>(undefined);
-    console.log("useVideoFilePath called:", videoFilePath);
+    // console.log("useVideoFilePath called:", videoFilePath);
 
     // Fetch global state on mount
     useEffect(() => {
@@ -129,7 +131,7 @@ function useVideoFilePath(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalVideoFilePath = async (path: string) => {
-        console.log("Original Video File Path Saved to State:", path);
+        // console.log("Original Video File Path Saved to State:", path);
         await invoke("set_app_state", { field: "videoFilePath", fieldValue: path });
     };
 
@@ -138,7 +140,7 @@ function useVideoFilePath(setOnly: boolean = false): {
         if (setOnly) return; // Skip listener setup if only setting state
 
         const unlisten = listen<string>("state-change--video-file-path", (event) => {
-            console.log("Video File Path Contained with State Change Event:", event.payload);
+            // console.log("Video File Path Contained with State Change Event:", event.payload);
             setLocalVideoFilePath(event.payload); 
         });
 
@@ -157,7 +159,7 @@ function useIsMultiWindow(setOnly: boolean = false): {
     setGlobalIsMultiwindow: (isMultiwindow: boolean) => Promise<void>; 
 } {
     const [isMultiwindow, setLocalIsMultiwindow] = useState<boolean | undefined>(undefined); // Initialize as null
-    console.log("useIsMultiwindow called:", isMultiwindow);
+    // console.log("useIsMultiwindow called:", isMultiwindow);
 
     // Fetch global state on mount
     useEffect(() => {
@@ -202,14 +204,15 @@ function useVideoStartTime(setOnly: boolean = false): {
     setGlobalVideoStartTime: (videoStartTime: Date | null) => Promise<void>; 
 } {
     const [videoStartTime, setLocalVideoStartTime] = useState<Date | null>(null); 
-    console.log("useVideoStartTime called:", videoStartTime);
+    // console.log("useVideoStartTime called:", videoStartTime);
 
     // Fetch global state on mount
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
-                const current_global_state = await invoke<Date | null>("get_app_state", { field: "videoStartTime" });
-                setLocalVideoStartTime(current_global_state);
+                const current_global_state = await invoke<string | null>("get_app_state", { field: "videoStartTime" });
+                console.log("Received videoStartTime", current_global_state);
+                setLocalVideoStartTime(current_global_state ? parseJSON(current_global_state) : null);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
                 setLocalVideoStartTime(null); // Default value on error
