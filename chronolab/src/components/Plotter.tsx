@@ -65,7 +65,7 @@ function Plotter() {
         xaxis: {
           ...prevLayout.xaxis,
           autorange: false,
-          range: [start, end],
+          range: [toZonedTime(start, "UTC"), toZonedTime(end, "UTC")],
         },
         transition: {
           duration: 1000,
@@ -84,11 +84,12 @@ function Plotter() {
 
         console.log("Video Time Change Listener Internal Calls:")
         console.log(`    Video time is now ${event.payload} seconds from the beginning.`);
-        console.log("    videoStartTime:", videoStartTime);
-        console.log("    Event payload -10:", -10 + event.payload);
-        console.log("    Event payload +10:", 10 + event.payload);
-        console.log("    addSeconds -10", addSeconds(videoStartTime, -10 + event.payload))
-        console.log("    addSeconds +10", addSeconds(videoStartTime, 10 + event.payload))
+        // console.log("    videoStartTime:", videoStartTime);
+        // console.log("    typeof videoStartTime:", typeof(videoStartTime));
+        // console.log("    Event payload -10:", -10 + event.payload);
+        // console.log("    Event payload +10:", 10 + event.payload);
+        // console.log("    addSeconds -10", addSeconds(videoStartTime, -10 + event.payload))
+        // console.log("    addSeconds +10", addSeconds(videoStartTime, 10 + event.payload))
 
         setAxesRange(
           addSeconds(videoStartTime, -10 + event.payload),
@@ -118,8 +119,6 @@ function Plotter() {
   function addSeconds(date: Date, seconds: number) {
     console.log("Called add seconds");
     console.log("    addSeconds Date:", date);
-    console.log("    typeof date:", typeof(date));
-    console.log("    addSeconds Seconds:", seconds);
     const newDate = new Date(date.getTime() + seconds * 1000);
     console.log("    New Date:", newDate)
     return newDate

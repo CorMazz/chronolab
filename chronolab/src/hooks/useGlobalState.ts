@@ -231,8 +231,8 @@ function useVideoStartTime(setOnly: boolean = false): {
     useEffect(() => {
         if (setOnly) return; // Skip listener setup if only setting state
 
-        const unlisten = listen<Date | null>("state-change--video-start-time", (event) => {
-            setLocalVideoStartTime(event.payload); 
+        const unlisten = listen<string | null>("state-change--video-start-time", (event) => {
+            setLocalVideoStartTime(event.payload ? parseJSON(event.payload) : null); 
         });
 
         // Cleanup the listener when the component unmounts

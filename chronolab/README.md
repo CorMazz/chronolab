@@ -22,7 +22,7 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 
 ### TimeZones
 
-On both the backend and the frontend we shall ignore timezones, because I don't want to deal with them and the user probably doesn't either. All datetimes on the backend will be NaiveDateTimes, and on the frontend, timezones will be "naive" in that I will artificially coerce them to UTC using the date-fns-tz library. 
+On both the backend and the frontend we shall ignore timezones, because I don't want to deal with them and the user probably doesn't either. All datetimes on the backend will be NaiveDateTimes, and on the frontend, timezones will be "naive" in that I will artificially coerce them to UTC using the date-fns-tz library.
 
 ## Potential Features
 
@@ -53,4 +53,4 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 ## Last Thing I Was Working On
 
-Times should be correct. Give that a second look, then get the plot to follow the video.
+Video following now works. Next, refactor the PlotSettings component to be completely independent of the Plotter component and enable reuse of that component by the Menu component so that users can change their settings after they've loaded the data. Same for the VideoPlayerForm component. I'm tired of having to completely reset this thing to modify the global state. 
