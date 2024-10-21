@@ -18,6 +18,7 @@ import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { parseJSON } from "date-fns";
+import { Button, Input, Label } from "@fluentui/react-components";
 
 // This is used to validate the form inputs
 const videoStartTimeFormInputs = z.object({
@@ -55,24 +56,33 @@ export function VideoStartTimeForm() {
       }
       };
 
-    return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            {/* End Time */}
-            <div>
-                <label htmlFor="video_start_time">Input the Video Start Time</label>
-                <input
-                    id="video_start_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("video_start_time")}
-                />
-                {errors.video_start_time && <p>{errors.video_start_time.message}</p>}
-            </div>
 
-            <button type="submit">Submit</button>
+      return (
+        <form onSubmit={handleSubmit(onFormSubmit)}>
+          {/* Video Start Time Input */}
+          <div>
+            <Label htmlFor="video_start_time" required>
+              Input the Video Start Time
+            </Label>
+            <Input
+              id="video_start_time"
+              type="datetime-local"
+              step="1"
+              {...register("video_start_time")}
+              appearance={errors.video_start_time ? "filled-darker" : "outline"}
+            />
+            {errors.video_start_time && (
+              <p style={{ color: 'red' }}>{errors.video_start_time.message}</p>
+            )}
+          </div>
+    
+          {/* Submit Button */}
+          <Button appearance="primary" type="submit">
+            Submit
+          </Button>
         </form>
-    );
-}
+      );
+    }
 
 
 
@@ -134,7 +144,7 @@ function VideoPlayer() {
           </MediaControlBar>
         </MediaController>
         ) : (
-          <button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</button>
+          <Button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</Button>
         )
       }
       {!videoStartTime && <VideoStartTimeForm/>}

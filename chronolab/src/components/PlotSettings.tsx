@@ -5,6 +5,8 @@ import useGlobalState, { LoadCsvSettings } from "../hooks/useGlobalState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseJSON, isAfter } from "date-fns";
+import { Button, Checkbox, Dropdown, Input, Label, Option, Select } from "@fluentui/react-components";
+import { selectCsvFile } from "../utils/fileSelectors";
 
 // These two are used to create an object from the JSON DataFrame schema sent by the backend
 interface DataFrameColumn {
@@ -20,8 +22,8 @@ interface PlotSettingsFormSchema {
 
 // This is used to validate the form inputs
 const plotSettingsFormInputs = z.object({
-    datetime_index_col: z.string(),
-    datetime_parsing_format_string: z.string(),
+    datetime_index_col: z.string().min(1, {message: "You must choose a column as your x-axis."}),
+    datetime_parsing_format_string: z.string().min(1, {message: "You must set a datetime format parse string."}),
     load_cols: z.array(z.string()).nonempty({message: "You must choose at least one column for the y-axis."}),
     // For start_time and end_time, convert empty strings to null since the html datetime input gives an empty string for no input
     start_time: z.preprocess(
@@ -62,8 +64,8 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
     const { handleSubmit, register, formState: { errors } } = useForm<PlotSettingsFormInputs>({
         resolver: zodResolver(plotSettingsFormInputs),
         defaultValues: {
-            load_cols: currentSettings?.load_cols,
-            datetime_index_col: currentSettings?.datetime_index_col,
+            load_cols: currentSettings?.load_cols ?? [],
+            datetime_index_col: currentSettings?.datetime_index_col ?? "",
             datetime_parsing_format_string: (currentSettings?.datetime_parsing_format_string) ?? "%Y-%m-%d %H:%M:%S",
             start_time: currentSettings?.time_bounds?.start_time ?? null,
             end_time: currentSettings?.time_bounds?.end_time ?? null,
@@ -83,77 +85,95 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
             }
         };
 
+        console.log("Form Submitted:", loadCsvSettings);
+        console.log("Errors:", errors);
         // Call the provided onSubmit function with the settings object
         onSubmit(loadCsvSettings);
     };
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)}>
-            <h3>Select Columns to Load</h3>
-
+          <h3>Select Columns to Load</h3>
+    
+          {/* Column Checkboxes */}
+          {columns.map((column) => (
+            <div key={`${column.name}-y-axis`}>
+              <Checkbox
+                value={column.name}
+                label={`${column.name} (${column.field_type})`}
+                {...register('load_cols')}
+              />
+            </div>
+          ))}
+          {errors.load_cols && <p style={{ color: 'red' }}>{errors.load_cols.message}</p>}
+    
+          {/* Datetime Index Column */}
+        <div>
+            <Label htmlFor="datetime_index_col" required>
+            Datetime Index Column (x-axis)
+            </Label>
+            <Select 
+            {...register('datetime_index_col', { required: true })}
+            >
             {columns.map((column) => (
-                <div key={`${column.name}-y-axis`}>
-                    <input
-                        type="checkbox"
-                        id={column.name}
-                        value={column.name}
-                        defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
-                        {...register("load_cols")}              
-                    />
-                    <label htmlFor={column.name}>{`${column.name} (${column.field_type})`}</label>
-                </div>
+                <option key={`${column.name}-x-axis`} value={column.name}>
+                    {column.name}
+                </option>
             ))}
-            {errors.load_cols && <p>{errors.load_cols.message}</p>}
-
-
-            {/* Datetime Index Column */}
-            <div>
-                <label htmlFor="datetime_index_col">Datetime Index Column (x-axis)</label>
-                <select id="datetime_index_col" {...register("datetime_index_col", { required: "You must set an x-axis column."})}>
-                    {columns.map((column) => (
-                        <option key={`${column.name}-x-axis`} value={column.name}>{column.name}</option>
-                    ))}
-                </select>
-                {errors.datetime_index_col && <p>{errors.datetime_index_col.message}</p>}
-            </div>
-
-            {/* Datetime Parsing Format */}
-            <div>
-                <label htmlFor="datetime_parsing_format_string">Datetime Parsing Format</label>
-                <input
-                    id="datetime_parsing_format_string"
-                    {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
-                />
-                {errors.datetime_parsing_format_string && <p>{errors.datetime_parsing_format_string.message}</p>}
-            </div>
-
-            {/* Start Time */}
-            <div>
-                <label htmlFor="start_time">Start Time (optional)</label>
-                <input
-                    id="start_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("start_time")}
-                />
-            </div>
-
-            {/* End Time */}
-            <div>
-                <label htmlFor="end_time">End Time (optional)</label>
-                <input
-                    id="end_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("end_time")}
-                />
-                {errors.end_time && <p>{errors.end_time.message}</p>}
-            </div>
-
-            <button type="submit">Submit</button>
+            </Select>
+            {errors.datetime_index_col && (
+            <p style={{ color: 'red' }}>{errors.datetime_index_col.message}</p>
+            )}
+        </div>
+    
+          {/* Datetime Parsing Format */}
+          <div>
+            <Label htmlFor="datetime_parsing_format_string" required>
+              Datetime Parsing Format
+            </Label>
+            <Input
+              id="datetime_parsing_format_string"
+              {...register('datetime_parsing_format_string', { required: true })}
+            />
+            {errors.datetime_parsing_format_string && (
+              <p style={{ color: 'red' }}>{errors.datetime_parsing_format_string.message}</p>
+            )}
+          </div>
+    
+          {/* Start Time */}
+          <div>
+            <Label htmlFor="start_time">
+              Start Time (optional)
+            </Label>
+            <Input
+              id="start_time"
+              type="datetime-local"
+              step="1"
+              {...register('start_time')}
+            />
+          </div>
+    
+          {/* End Time */}
+          <div>
+            <Label htmlFor="end_time">
+              End Time (optional)
+            </Label>
+            <Input
+              id="end_time"
+              type="datetime-local"
+              step="1"
+              {...register('end_time')}
+            />
+            {errors.end_time && <p style={{ color: 'red' }}>{errors.end_time.message}</p>}
+          </div>
+    
+          {/* Submit Button */}
+          <Button appearance="primary" type="submit">
+            Submit
+          </Button>
         </form>
-    );
-}
+      );
+    }
 
 // ##############################################################################################################
 // Parent Component
@@ -161,7 +181,7 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
 
 function PlotSettings() {
     const { loadCsvSettings, setLoadCsvSettings } = useGlobalState({ loadCsvSettings: true, setOnly: false })
-    const { csvFilePath } = useGlobalState({ csvFile: true })
+    const { csvFilePath, setCsvFilePath } = useGlobalState({ csvFile: true })
     const [columns, setColumns] = useState<DataFrameColumn[] | undefined>(undefined);
 
     const handleFormSubmit = (settings: LoadCsvSettings) => {
@@ -193,12 +213,15 @@ function PlotSettings() {
 
     return (
         <div>
-            {columns === undefined ? null : columns.length === 0 ? (
-                <p>No columns available to select. Was this CSV file formatted correctly?</p>
+            {!csvFilePath ? (
+                <Button onClick={() => selectCsvFile(setCsvFilePath)}>Select CSV File</Button>
             ) : (
-                <PlotSettingsForm columns={columns} onSubmit={handleFormSubmit} currentSettings={loadCsvSettings ?? null} />
+                columns == null || columns.length === 0) ? (
+                    <p>No columns available to select. Was this CSV file formatted correctly?</p>
+            ) : (
+                <PlotSettingsForm columns={columns ?? []} onSubmit={handleFormSubmit} currentSettings={loadCsvSettings ?? null} />
             )}
-            </div>
+        </div>
     );
 }
 

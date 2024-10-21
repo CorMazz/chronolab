@@ -5,6 +5,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { useState } from 'react';
 import PlotSettings from './PlotSettings';
 import { VideoStartTimeForm } from './VideoPlayer';
+import { Button, Menu as FluentMenu, MenuTrigger, MenuPopover, MenuList, MenuItem, Drawer, DrawerHeader, DrawerBody, DrawerFooter } from '@fluentui/react-components';
+
 
 
 
@@ -16,8 +18,8 @@ function Menu() {
     const {setCsvFilePath, setVideoFilePath, setIsMultiwindow} = useGlobalState(
         {csvFile: true, videoFile: true, isMultiwindow: true, setOnly: true}
     );
-    const [showPlotSettings, setShowPlotSettings] = useState(false);
-    const [showVideoSettings, setShowVideoSettings] = useState(false);
+    const [isPlotSettingsOpen, setIsPlotSettingsOpen] = useState(false);
+    const [isVideoSettingsOpen, setIsVideoSettingsOpen] = useState(false);
 
 
     /**
@@ -55,33 +57,78 @@ function Menu() {
         // });
     }
 
-    /**
-     * Toggle the visibility of the PlotSettings component.
-     */
-    const togglePlotSettings = () => {
-        setShowPlotSettings(prevState => !prevState);
-    }
-
-    /**
-     * Toggle the visibility of the PlotSettings component.
-     */
-    const toggleVideoSettings = () => {
-        setShowVideoSettings(prevState => !prevState);
-    }
+    const openPlotSettings = () => setIsPlotSettingsOpen(true);
+    const closePlotSettings = () => setIsPlotSettingsOpen(false);
+  
+    const openVideoSettings = () => setIsVideoSettingsOpen(true);
+    const closeVideoSettings = () => setIsVideoSettingsOpen(false);
 
     return (
         <div id="container">
-            <button onClick={() => invoke( "get_csv_schema" ).then((schema) => console.log(schema))}>Get CSV Schema</button>
-            <button onClick={() => selectCsvFile(setCsvFilePath)}>Navbar: Select CSV File</button>
-            <button onClick={() => selectVideoFile(setVideoFilePath)}>Navbar: Select Video File</button>
-            {/* <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button> */}
-            <button onClick={togglePlotSettings}>{showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}</button>
-                {showPlotSettings && <PlotSettings />}
-            <button onClick={toggleVideoSettings}>{showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}</button>
-                {showVideoSettings && <VideoStartTimeForm />}
-            
+          {/* Menu Component for top navigation */}
+          <FluentMenu>
+            <MenuTrigger>
+              <Button>Menu</Button>
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={() => invoke('get_csv_schema').then((schema) => console.log(schema))}>
+                  Get CSV Schema
+                </MenuItem>
+                <MenuItem onClick={() => selectCsvFile(setCsvFilePath)}>
+                  Select CSV File
+                </MenuItem>
+                <MenuItem onClick={() => selectVideoFile(setVideoFilePath)}>
+                  Select Video File
+                </MenuItem>
+                <MenuItem onClick={openPlotSettings}>
+                  Show Plot Settings
+                </MenuItem>
+                <MenuItem onClick={openVideoSettings}>
+                  Show Video Settings
+                </MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </FluentMenu>
+    
+          {/* Drawer for Plot Settings */}
+          <Drawer
+            open={isPlotSettingsOpen}
+            onOpenChange={(event, openState) => setIsPlotSettingsOpen(openState.open)}
+          >
+            <DrawerHeader>
+              <h2>Plot Settings</h2>
+            </DrawerHeader>
+            <DrawerBody>
+              {/* Render your PlotSettings component here */}
+              <PlotSettings />
+            </DrawerBody>
+            <DrawerFooter>
+              <Button appearance="secondary" onClick={closePlotSettings}>
+                Close
+              </Button>
+            </DrawerFooter>
+          </Drawer>
+    
+          {/* Drawer for Video Start Time Settings */}
+          <Drawer
+            open={isVideoSettingsOpen}
+            onOpenChange={(event, openState) => setIsVideoSettingsOpen(openState.open)}
+          >
+            <DrawerHeader>
+              <h2>Video Settings</h2>
+            </DrawerHeader>
+            <DrawerBody>
+              {/* Render your VideoStartTimeForm component here */}
+              <VideoStartTimeForm />
+            </DrawerBody>
+            <DrawerFooter>
+              <Button appearance="secondary" onClick={closeVideoSettings}>
+                Close
+              </Button>
+            </DrawerFooter>
+          </Drawer>
         </div>
-    )
-}
-
+      );
+};
 export default Menu;

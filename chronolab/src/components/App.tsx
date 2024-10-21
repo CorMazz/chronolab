@@ -1,4 +1,4 @@
-import Menu from './Menu';
+import NavMenu from './Menu';
 import VideoPlayer from './VideoPlayer';
 import useGlobalState from '../hooks/useGlobalState';
 import PlotSettings from './PlotSettings';
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div>
-      <Menu/>
+      <NavMenu/>
       <VideoPlayer/>
       {!isMultiwindow && (loadCsvSettings ? <Plotter/> : <PlotSettings/>)}
     </div>
