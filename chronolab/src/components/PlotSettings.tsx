@@ -5,7 +5,9 @@ import useGlobalState, { LoadCsvSettings } from "../hooks/useGlobalState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseJSON, isAfter } from "date-fns";
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText, MenuItem, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Container, FormControl, FormControlLabel, FormGroup, FormHelperText, MenuItem, TextField, Typography } from "@mui/material";
+import { selectCsvFile } from "../utils/fileSelectors";
+import OptionalButton from "./custom-ui-components/OptionalButton";
 
 // These two are used to create an object from the JSON DataFrame schema sent by the backend
 interface DataFrameColumn {
@@ -60,11 +62,12 @@ type PlotSettingsFormInputs = z.infer<typeof plotSettingsFormInputs>;
 // ##############################################################################################################
 
 function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFormSchema) {
+    console.log("datetime_index_col default value:", currentSettings?.datetime_index_col, currentSettings?.datetime_index_col ?? "empty string")
     const { handleSubmit, register, formState: { errors } } = useForm<PlotSettingsFormInputs>({
         resolver: zodResolver(plotSettingsFormInputs),
         defaultValues: {
-            load_cols: currentSettings?.load_cols,
-            datetime_index_col: currentSettings?.datetime_index_col,
+            load_cols: currentSettings?.load_cols ?? [],
+            datetime_index_col: currentSettings?.datetime_index_col ?? "",
             datetime_parsing_format_string: (currentSettings?.datetime_parsing_format_string) ?? "%Y-%m-%d %H:%M:%S",
             start_time: currentSettings?.time_bounds?.start_time ?? null,
             end_time: currentSettings?.time_bounds?.end_time ?? null,
@@ -191,8 +194,7 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
 // ##############################################################################################################
 
 function PlotSettings() {
-    const { loadCsvSettings, setLoadCsvSettings } = useGlobalState({ loadCsvSettings: true, setOnly: false })
-    const { csvFilePath } = useGlobalState({ csvFile: true })
+    const { loadCsvSettings, setLoadCsvSettings, csvFilePath, setCsvFilePath } = useGlobalState({ csvFile: true, loadCsvSettings: true, setOnly: false })
     const [columns, setColumns] = useState<DataFrameColumn[] | undefined>(undefined);
 
     const handleFormSubmit = (settings: LoadCsvSettings) => {
@@ -223,20 +225,35 @@ function PlotSettings() {
     }, [csvFilePath]);
 
     return (
-        <Box sx={{ p: 3 }}>
-            {/* Conditional rendering based on column availability */}
-            {columns === undefined ? null : columns.length === 0 ? (
-                <Typography variant="body1" color="textSecondary" align="center">
-                    No columns available to select. Was this CSV file formatted correctly?
-                </Typography>
-            ) : (
-                <PlotSettingsForm 
-                    columns={columns} 
-                    onSubmit={handleFormSubmit} 
-                    currentSettings={loadCsvSettings ?? null} 
-                />
-            )}
-        </Box>
+            <Box 
+                sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                mt: 4, 
+                p: 2, 
+            }}>
+                {/* Conditional rendering based on column availability */}
+                {!csvFilePath ? (                        
+                        <OptionalButton toggleable={false} onClick={() => selectCsvFile(setCsvFilePath)}>
+                            Select CSV File
+                        </OptionalButton>
+                    ) : (
+                            (columns === undefined || columns.length === 0) ? (
+                                <Typography variant="body1" color="textSecondary" align="center">
+                                    No columns available to select. Was this CSV file formatted correctly?
+                                </Typography>
+                        ) : (
+                            <PlotSettingsForm 
+                                columns={columns} 
+                                onSubmit={handleFormSubmit} 
+                                currentSettings={loadCsvSettings ?? null} 
+                            />
+                        )
+                    )
+                }
+            </Box>
     );
 }
 

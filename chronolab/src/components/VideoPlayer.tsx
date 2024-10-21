@@ -12,7 +12,7 @@ import {
   MediaSeekForwardButton,
   MediaMuteButton,
 } from 'media-chrome/react';
-import { Container, Button, Box, Typography } from '@mui/material';
+import { Container, Button, Box, Typography, TextField } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
 import { selectVideoFile } from "../utils/fileSelectors";
 import {z} from 'zod';
@@ -57,20 +57,33 @@ export function VideoStartTimeForm() {
       };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            {/* End Time */}
-            <div>
-                <label htmlFor="video_start_time">Input the Video Start Time</label>
-                <input
+<form onSubmit={handleSubmit(onFormSubmit)}>
+            {/* Video Start Time */}
+            <Box mb={3}>
+                <Typography variant="h6" gutterBottom>
+                    Input the Video Start Time
+                </Typography>
+                <TextField
+                    fullWidth
                     id="video_start_time"
+                    label="Video Start Time"
                     type="datetime-local"
-                    step="1"
+                    slotProps={{
+                      htmlInput: {step: "1"},
+                      inputLabel: {shrink: true},
+                    }}
                     {...register("video_start_time")}
+                    error={!!errors.video_start_time}
+                    helperText={errors.video_start_time ? errors.video_start_time.message : ""}
                 />
-                {errors.video_start_time && <p>{errors.video_start_time.message}</p>}
-            </div>
+            </Box>
 
-            <button type="submit">Submit</button>
+            {/* Submit Button */}
+            <Box textAlign="center" mt={2}>
+                <Button variant="contained" color="primary" type="submit">
+                    Submit
+                </Button>
+            </Box>
         </form>
     );
 }
@@ -165,9 +178,6 @@ function VideoPlayer() {
 
             {!videoStartTime && (
                 <Box mt={4} width="100%">
-                    <Typography variant="h6" gutterBottom>
-                        Set Video Start Time
-                    </Typography>
                     <VideoStartTimeForm />
                 </Box>
             )}

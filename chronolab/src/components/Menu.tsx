@@ -72,7 +72,7 @@ function Menu() {
 
     return (
         <div>
-            <AppBar position="static">
+            <AppBar position="static" sx={{ width: "100%" }}>
                 <Toolbar>
                     <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between' }}>
                         <Button color="inherit" onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))}>

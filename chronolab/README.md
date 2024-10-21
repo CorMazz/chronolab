@@ -34,6 +34,7 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 2. **IOI Noting**
    1. Have a dialog on the right side that allows the user to note items of interest and add a name/description of the event
    2. Allow the user to rapidly seek to that time in the event
+   3. <https://hacks.mozilla.org/2014/08/building-interactive-html5-videos/>
 3. **Video Section Labeling**
    1. Like how on YouTube you can hover over the video time bar and it will tell you what different sections there are
 4. **Rust backend video editing**
