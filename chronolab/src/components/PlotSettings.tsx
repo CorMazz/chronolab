@@ -88,72 +88,85 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
     };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            <h3>Select Columns to Load</h3>
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 p-4 bg-white shadow-lg rounded-lg max-w-lg mx-auto">
+            <h3 className="text-2xl font-semibold text-gray-800">Select Columns to Load</h3>
 
-            {columns.map((column) => (
-                <div key={`${column.name}-y-axis`}>
-                    <input
-                        type="checkbox"
-                        id={column.name}
-                        value={column.name}
-                        defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
-                        {...register("load_cols")}              
-                    />
-                    <label htmlFor={column.name}>{`${column.name} (${column.field_type})`}</label>
-                </div>
-            ))}
-            {errors.load_cols && <p>{errors.load_cols.message}</p>}
-
+            {/* Y-Axis Columns (load_cols) */}
+            <div className="space-y-2">
+                {columns.map((column) => (
+                    <div key={`${column.name}-y-axis`} className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id={column.name}
+                            value={column.name}
+                            defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
+                            {...register("load_cols")}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor={column.name} className="text-gray-700">{`${column.name} (${column.field_type})`}</label>
+                    </div>
+                ))}
+                {errors.load_cols && <p className="text-red-600">{errors.load_cols.message}</p>}
+            </div>
 
             {/* Datetime Index Column */}
-            <div>
-                <label htmlFor="datetime_index_col">Datetime Index Column (x-axis)</label>
-                <select id="datetime_index_col" {...register("datetime_index_col", { required: "You must set an x-axis column."})}>
+            <div className="space-y-1">
+                <label htmlFor="datetime_index_col" className="block text-gray-700 font-medium">Datetime Index Column (x-axis)</label>
+                <select 
+                    id="datetime_index_col" 
+                    {...register("datetime_index_col", { required: "You must set an x-axis column."})}
+                    className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
                     {columns.map((column) => (
                         <option key={`${column.name}-x-axis`} value={column.name}>{column.name}</option>
                     ))}
                 </select>
-                {errors.datetime_index_col && <p>{errors.datetime_index_col.message}</p>}
+                {errors.datetime_index_col && <p className="text-red-600">{errors.datetime_index_col.message}</p>}
             </div>
 
             {/* Datetime Parsing Format */}
-            <div>
-                <label htmlFor="datetime_parsing_format_string">Datetime Parsing Format</label>
+            <div className="space-y-1">
+                <label htmlFor="datetime_parsing_format_string" className="block text-gray-700 font-medium">Datetime Parsing Format</label>
                 <input
                     id="datetime_parsing_format_string"
                     {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
+                    className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 />
-                {errors.datetime_parsing_format_string && <p>{errors.datetime_parsing_format_string.message}</p>}
+                {errors.datetime_parsing_format_string && <p className="text-red-600">{errors.datetime_parsing_format_string.message}</p>}
             </div>
 
             {/* Start Time */}
-            <div>
-                <label htmlFor="start_time">Start Time (optional)</label>
+            <div className="space-y-1">
+                <label htmlFor="start_time" className="block text-gray-700 font-medium">Start Time (optional)</label>
                 <input
                     id="start_time"
                     type="datetime-local"
                     step="1"
                     {...register("start_time")}
+                    className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 />
             </div>
 
             {/* End Time */}
-            <div>
-                <label htmlFor="end_time">End Time (optional)</label>
+            <div className="space-y-1">
+                <label htmlFor="end_time" className="block text-gray-700 font-medium">End Time (optional)</label>
                 <input
                     id="end_time"
                     type="datetime-local"
                     step="1"
                     {...register("end_time")}
+                    className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 />
-                {errors.end_time && <p>{errors.end_time.message}</p>}
+                {errors.end_time && <p className="text-red-600">{errors.end_time.message}</p>}
             </div>
 
-            <button type="submit">Submit</button>
+            <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-700 focus:ring focus:ring-blue-200">
+                Submit
+            </button>
         </form>
     );
 }
+
 
 // ##############################################################################################################
 // Parent Component
@@ -192,13 +205,13 @@ function PlotSettings() {
     }, [csvFilePath]);
 
     return (
-        <div>
+        <div className="p-4">
             {columns === undefined ? null : columns.length === 0 ? (
-                <p>No columns available to select. Was this CSV file formatted correctly?</p>
+                <p className="text-red-600">No columns available to select. Was this CSV file formatted correctly?</p>
             ) : (
                 <PlotSettingsForm columns={columns} onSubmit={handleFormSubmit} currentSettings={loadCsvSettings ?? null} />
             )}
-            </div>
+        </div>
     );
 }
 

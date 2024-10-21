@@ -40,6 +40,17 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 7. **Automatic video start time parsing**
    1. Search for anything resembling a datetime string in the video file name and use that as the video start time.
 
+## Developer Instructions
+
+Run this in a terminal to update the CSS.
+`npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch`
+
+Run this in another terminal to have the React Devtools available.
+`npx react-devtools`
+
+And finally, run this in another terminal to build the app backend and hot reload the frontend during development.
+`pnpm tauri dev`
+
 ## TODO
 
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)

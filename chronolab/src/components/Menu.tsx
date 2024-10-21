@@ -70,17 +70,52 @@ function Menu() {
     }
 
     return (
-        <div id="container">
-            <button onClick={() => invoke( "get_csv_schema" ).then((schema) => console.log(schema))}>Get CSV Schema</button>
-            <button onClick={() => selectCsvFile(setCsvFilePath)}>Navbar: Select CSV File</button>
-            <button onClick={() => selectVideoFile(setVideoFilePath)}>Navbar: Select Video File</button>
-            {/* <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button> */}
-            <button onClick={togglePlotSettings}>{showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}</button>
+        <div id="container" className="p-4 bg-gray-100 rounded-lg shadow-lg max-w-2xl mx-auto space-y-4">
+            <div className="space-y-4">
+                {/* Button: Get CSV Schema */}
+                <button 
+                onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))} 
+                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+                >
+                Get CSV Schema
+                </button>
+
+                {/* Button: Select CSV File */}
+                <button 
+                onClick={() => selectCsvFile(setCsvFilePath)} 
+                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+                >
+                Navbar: Select CSV File
+                </button>
+
+                {/* Button: Select Video File */}
+                <button 
+                onClick={() => selectVideoFile(setVideoFilePath)} 
+                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+                >
+                Navbar: Select Video File
+                </button>
+
+                {/* Toggle Button for Plot Settings */}
+                <button 
+                onClick={togglePlotSettings} 
+                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+                >
+                {showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}
+                </button>
                 {showPlotSettings && <PlotSettings />}
-            <button onClick={toggleVideoSettings}>{showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}</button>
+
+                {/* Toggle Button for Video Settings */}
+                <button 
+                onClick={toggleVideoSettings} 
+                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+                >
+                {showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}
+                </button>
                 {showVideoSettings && <VideoStartTimeForm />}
-            
+            </div>
         </div>
+
     )
 }
 

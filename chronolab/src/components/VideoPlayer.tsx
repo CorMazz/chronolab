@@ -56,21 +56,31 @@ export function VideoStartTimeForm() {
       };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            {/* End Time */}
-            <div>
-                <label htmlFor="video_start_time">Input the Video Start Time</label>
-                <input
-                    id="video_start_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("video_start_time")}
-                />
-                {errors.video_start_time && <p>{errors.video_start_time.message}</p>}
-            </div>
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+        {/* End Time */}
+        <div className="space-y-2">
+          <label htmlFor="video_start_time" className="block text-gray-700 font-semibold">
+            Input the Video Start Time
+          </label>
+          <input
+            id="video_start_time"
+            type="datetime-local"
+            step="1"
+            {...register("video_start_time")}
+            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          {errors.video_start_time && (
+            <p className="text-red-600 text-sm">{errors.video_start_time.message}</p>
+          )}
+        </div>
 
-            <button type="submit">Submit</button>
-        </form>
+        <button 
+          type="submit" 
+          className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+        >
+          Submit
+        </button>
+      </form>
     );
 }
 
@@ -111,35 +121,44 @@ function VideoPlayer() {
 
 
   return (
-    <div className="container">
-
+    <div className="container mx-auto p-4 bg-gray-100 shadow-md rounded-lg max-w-3xl">
       {videoFilePath ? (
-        <MediaController>
-          <video
-            ref={videoRef}
-            slot="media"
-            src={convertFileSrc(videoFilePath)}
-            preload="auto"
-            muted
-            crossOrigin=""
-          />
-          <MediaControlBar>
-            <MediaPlayButton></MediaPlayButton>
-            <MediaSeekBackwardButton></MediaSeekBackwardButton>
-            <MediaSeekForwardButton></MediaSeekForwardButton>
-            <MediaTimeRange></MediaTimeRange>
-            <MediaTimeDisplay showDuration></MediaTimeDisplay>
-            <MediaMuteButton></MediaMuteButton>
-            <MediaVolumeRange></MediaVolumeRange>
-          </MediaControlBar>
-        </MediaController>
-        ) : (
-          <button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</button>
-        )
-      }
-      {!videoStartTime && <VideoStartTimeForm/>}
-
+        <div className="video-player-container space-y-4">
+          <MediaController>
+            <video
+              ref={videoRef}
+              slot="media"
+              src={convertFileSrc(videoFilePath)}
+              preload="auto"
+              muted
+              crossOrigin=""
+              className="w-full rounded-md shadow-md"
+            />
+            <MediaControlBar>
+              <MediaPlayButton></MediaPlayButton>
+              <MediaSeekBackwardButton></MediaSeekBackwardButton>
+              <MediaSeekForwardButton></MediaSeekForwardButton>
+              <MediaTimeRange></MediaTimeRange>
+              <MediaTimeDisplay showDuration></MediaTimeDisplay>
+              <MediaMuteButton></MediaMuteButton>
+              <MediaVolumeRange></MediaVolumeRange>
+            </MediaControlBar>
+          </MediaController>
+        </div>
+      ) : (
+        <div className="text-center">
+          <button 
+            onClick={() => selectVideoFile(setVideoFilePath)} 
+            className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:ring focus:ring-blue-200 transition"
+          >
+            Select Video File (Video Player Button)
+          </button>
+        </div>
+      )}
+      
+      {!videoStartTime && <VideoStartTimeForm />}
     </div>
+
   );
 }
 
