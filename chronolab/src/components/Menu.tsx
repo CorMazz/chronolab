@@ -5,6 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useState } from 'react';
 import PlotSettings from './PlotSettings';
 import { VideoStartTimeForm } from './VideoPlayer';
+import { AppBar, Toolbar, Button, Box, Drawer, Container } from '@mui/material';
 
 
 
@@ -70,16 +71,42 @@ function Menu() {
     }
 
     return (
-        <div id="container">
-            <button onClick={() => invoke( "get_csv_schema" ).then((schema) => console.log(schema))}>Get CSV Schema</button>
-            <button onClick={() => selectCsvFile(setCsvFilePath)}>Navbar: Select CSV File</button>
-            <button onClick={() => selectVideoFile(setVideoFilePath)}>Navbar: Select Video File</button>
-            {/* <button onClick={createNewWindow}>Navbar: Open Plot in New Window</button> */}
-            <button onClick={togglePlotSettings}>{showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}</button>
-                {showPlotSettings && <PlotSettings />}
-            <button onClick={toggleVideoSettings}>{showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}</button>
-                {showVideoSettings && <VideoStartTimeForm />}
-            
+        <div>
+            <AppBar position="static">
+                <Toolbar>
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between' }}>
+                        <Button color="inherit" onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))}>
+                            Get CSV Schema
+                        </Button>
+                        <Button color="inherit" onClick={() => selectCsvFile(setCsvFilePath)}>
+                            Select CSV File
+                        </Button>
+                        <Button color="inherit" onClick={() => selectVideoFile(setVideoFilePath)}>
+                            Select Video File
+                        </Button>
+                        <Button color="inherit" onClick={togglePlotSettings}>
+                            {showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}
+                        </Button>
+                        <Button color="inherit" onClick={toggleVideoSettings}>
+                            {showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}
+                        </Button>
+                    </Box>
+                </Toolbar>
+            </AppBar>
+
+            {/* Drawer for Plot Settings */}
+            <Drawer anchor="right" open={showPlotSettings} onClose={togglePlotSettings}>
+                <Container sx={{ width: 300, padding: 2 }}>
+                    <PlotSettings />
+                </Container>
+            </Drawer>
+
+            {/* Drawer for Video Settings */}
+            <Drawer anchor="right" open={showVideoSettings} onClose={toggleVideoSettings}>
+                <Container sx={{ width: 300, padding: 2 }}>
+                    <VideoStartTimeForm />
+                </Container>
+            </Drawer>
         </div>
     )
 }

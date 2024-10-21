@@ -13,8 +13,7 @@ function Plotter() {
   const [csvTable, setCsvTable] = useState<Table | null>(null);
   const [plotData, setPlotData] = useState<Data[] | null>(null);
   const [layout, setLayout] = useState({
-    width: 640,
-    height: 480,
+    autosize: true,
     title: 'Data Plot',
     xaxis: {
       autorange: true,
@@ -132,6 +131,7 @@ function Plotter() {
         data={plotData}
         layout={layout}
         onRelayout={handleRelayout}
+        useResizeHandler
       />}
     </div>
   );

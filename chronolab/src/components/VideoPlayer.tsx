@@ -12,6 +12,7 @@ import {
   MediaSeekForwardButton,
   MediaMuteButton,
 } from 'media-chrome/react';
+import { Container, Button, Box, Typography } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
 import { selectVideoFile } from "../utils/fileSelectors";
 import {z} from 'zod';
@@ -110,36 +111,68 @@ function VideoPlayer() {
   
 
 
-  return (
-    <div className="container">
+  return  (
+    <Container>
+        <Box 
+            sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                mt: 4, 
+                p: 2, 
+                border: '1px solid #ccc', 
+                borderRadius: 2 
+            }}
+        >
+            {videoFilePath ? (
+                <Box sx={{ width: '100%', mb: 2 }}>
+                    <MediaController>
+                        <video
+                            ref={videoRef}
+                            slot="media"
+                            src={convertFileSrc(videoFilePath)}
+                            preload="auto"
+                            muted
+                            crossOrigin=""
+                            style={{ width: '100%', borderRadius: 8 }} // Rounded corners for the video player
+                        />
+                        <MediaControlBar>
+                            <MediaPlayButton></MediaPlayButton>
+                            <MediaSeekBackwardButton></MediaSeekBackwardButton>
+                            <MediaSeekForwardButton></MediaSeekForwardButton>
+                            <MediaTimeRange></MediaTimeRange>
+                            <MediaTimeDisplay showDuration></MediaTimeDisplay>
+                            <MediaMuteButton></MediaMuteButton>
+                            <MediaVolumeRange></MediaVolumeRange>
+                        </MediaControlBar>
+                    </MediaController>
+                </Box>
+            ) : (
+                <Box textAlign="center">
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                        No video file selected
+                    </Typography>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        onClick={() => selectVideoFile(setVideoFilePath)}
+                    >
+                        Select Video File
+                    </Button>
+                </Box>
+            )}
 
-      {videoFilePath ? (
-        <MediaController>
-          <video
-            ref={videoRef}
-            slot="media"
-            src={convertFileSrc(videoFilePath)}
-            preload="auto"
-            muted
-            crossOrigin=""
-          />
-          <MediaControlBar>
-            <MediaPlayButton></MediaPlayButton>
-            <MediaSeekBackwardButton></MediaSeekBackwardButton>
-            <MediaSeekForwardButton></MediaSeekForwardButton>
-            <MediaTimeRange></MediaTimeRange>
-            <MediaTimeDisplay showDuration></MediaTimeDisplay>
-            <MediaMuteButton></MediaMuteButton>
-            <MediaVolumeRange></MediaVolumeRange>
-          </MediaControlBar>
-        </MediaController>
-        ) : (
-          <button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</button>
-        )
-      }
-      {!videoStartTime && <VideoStartTimeForm/>}
-
-    </div>
+            {!videoStartTime && (
+                <Box mt={4} width="100%">
+                    <Typography variant="h6" gutterBottom>
+                        Set Video Start Time
+                    </Typography>
+                    <VideoStartTimeForm />
+                </Box>
+            )}
+        </Box>
+    </Container>
   );
 }
 

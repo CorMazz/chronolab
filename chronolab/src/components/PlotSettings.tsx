@@ -5,6 +5,7 @@ import useGlobalState, { LoadCsvSettings } from "../hooks/useGlobalState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseJSON, isAfter } from "date-fns";
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText, MenuItem, TextField, Typography } from "@mui/material";
 
 // These two are used to create an object from the JSON DataFrame schema sent by the backend
 interface DataFrameColumn {
@@ -89,68 +90,98 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)}>
-            <h3>Select Columns to Load</h3>
+            <Typography variant="h6" gutterBottom>
+                Select Columns to Load
+            </Typography>
 
-            {columns.map((column) => (
-                <div key={`${column.name}-y-axis`}>
-                    <input
-                        type="checkbox"
-                        id={column.name}
-                        value={column.name}
-                        defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
-                        {...register("load_cols")}              
-                    />
-                    <label htmlFor={column.name}>{`${column.name} (${column.field_type})`}</label>
-                </div>
-            ))}
-            {errors.load_cols && <p>{errors.load_cols.message}</p>}
-
+            <FormControl component="fieldset" error={!!errors.load_cols} sx={{ mb: 2 }}>
+                <FormGroup>
+                    {columns.map((column) => (
+                        <FormControlLabel
+                            key={`${column.name}-y-axis`}
+                            control={
+                                <Checkbox
+                                    id={column.name}
+                                    value={column.name}
+                                    defaultChecked={currentSettings ? (column.name in currentSettings.load_cols) : false}
+                                    {...register("load_cols")}
+                                />
+                            }
+                            label={`${column.name} (${column.field_type})`}
+                        />
+                    ))}
+                </FormGroup>
+                {errors.load_cols && (
+                    <FormHelperText>{errors.load_cols.message}</FormHelperText>
+                )}
+            </FormControl>
 
             {/* Datetime Index Column */}
-            <div>
-                <label htmlFor="datetime_index_col">Datetime Index Column (x-axis)</label>
-                <select id="datetime_index_col" {...register("datetime_index_col", { required: "You must set an x-axis column."})}>
-                    {columns.map((column) => (
-                        <option key={`${column.name}-x-axis`} value={column.name}>{column.name}</option>
-                    ))}
-                </select>
-                {errors.datetime_index_col && <p>{errors.datetime_index_col.message}</p>}
-            </div>
+            <TextField
+                select
+                fullWidth
+                label="Datetime Index Column (x-axis)"
+                id="datetime_index_col"
+                margin="normal"
+                error={!!errors.datetime_index_col}
+                helperText={errors.datetime_index_col ? errors.datetime_index_col.message : ""}
+                {...register("datetime_index_col", { required: "You must set an x-axis column." })}
+                >
+                {columns.map((column) => (
+                    <MenuItem key={`${column.name}-x-axis`} value={column.name}>
+                        {column.name}
+                    </MenuItem>
+                ))}
+            </TextField>
 
             {/* Datetime Parsing Format */}
-            <div>
-                <label htmlFor="datetime_parsing_format_string">Datetime Parsing Format</label>
-                <input
-                    id="datetime_parsing_format_string"
-                    {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
-                />
-                {errors.datetime_parsing_format_string && <p>{errors.datetime_parsing_format_string.message}</p>}
-            </div>
+            <TextField
+                fullWidth
+                label="Datetime Parsing Format"
+                id="datetime_parsing_format_string"
+                margin="normal"
+                error={!!errors.datetime_parsing_format_string}
+                helperText={errors.datetime_parsing_format_string ? errors.datetime_parsing_format_string.message : ""}
+                {...register("datetime_parsing_format_string", { required: "You must set a datetime parsing string." })}
+            />
 
             {/* Start Time */}
-            <div>
-                <label htmlFor="start_time">Start Time (optional)</label>
-                <input
-                    id="start_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("start_time")}
-                />
-            </div>
+            <TextField
+                fullWidth
+                label="Start Time (optional)"
+                id="start_time"
+                type="datetime-local"
+                margin="normal"
+                // https://mui.com/material-ui/migration/migrating-from-deprecated-apis/#props-props
+                slotProps={{
+                    htmlInput: {step: "1"},
+                    inputLabel: {shrink: true},
+                }}
+                {...register("start_time")}
+            />
 
             {/* End Time */}
-            <div>
-                <label htmlFor="end_time">End Time (optional)</label>
-                <input
-                    id="end_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("end_time")}
-                />
-                {errors.end_time && <p>{errors.end_time.message}</p>}
-            </div>
+            <TextField
+                fullWidth
+                label="End Time (optional)"
+                id="end_time"
+                type="datetime-local"
+                margin="normal"
 
-            <button type="submit">Submit</button>
+                slotProps={{
+                    htmlInput: {step: "1"},
+                    inputLabel: {shrink: true},
+                }}
+                error={!!errors.end_time}
+                helperText={errors.end_time ? errors.end_time.message : ""}
+                {...register("end_time")}
+            />
+
+            <Box textAlign="center" mt={3}>
+                <Button variant="contained" color="primary" type="submit">
+                    Submit
+                </Button>
+            </Box>
         </form>
     );
 }
@@ -192,13 +223,20 @@ function PlotSettings() {
     }, [csvFilePath]);
 
     return (
-        <div>
+        <Box sx={{ p: 3 }}>
+            {/* Conditional rendering based on column availability */}
             {columns === undefined ? null : columns.length === 0 ? (
-                <p>No columns available to select. Was this CSV file formatted correctly?</p>
+                <Typography variant="body1" color="textSecondary" align="center">
+                    No columns available to select. Was this CSV file formatted correctly?
+                </Typography>
             ) : (
-                <PlotSettingsForm columns={columns} onSubmit={handleFormSubmit} currentSettings={loadCsvSettings ?? null} />
+                <PlotSettingsForm 
+                    columns={columns} 
+                    onSubmit={handleFormSubmit} 
+                    currentSettings={loadCsvSettings ?? null} 
+                />
             )}
-            </div>
+        </Box>
     );
 }
 

@@ -24,6 +24,10 @@ This was implemented on the backend in the `/src-tauri/src/global_state.rs` file
 
 On both the backend and the frontend we shall ignore timezones, because I don't want to deal with them and the user probably doesn't either. All datetimes on the backend will be NaiveDateTimes, and on the frontend, timezones will be "naive" in that I will artificially coerce them to UTC using the date-fns-tz library.
 
+### UI Framework
+
+I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice.
+
 ## Potential Features
 
 1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
@@ -45,11 +49,11 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)
 2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
 3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
-4. Add Tailwind and start making this thing pretty.
-5. Set isMultiwindow to false when the second window closes.
-6. Determine if I need to switch the state to RwLock instead of Mutex
-7. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
-8. Let the user pull up the plot settings menu again.
+4. Set isMultiwindow to false when the second window closes.
+5. Determine if I need to switch the state to RwLock instead of Mutex
+6. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
+7. Allow users to drag the plot window and the video window to different places.
+8. Make the PlotSettings tell the user to select a CSV file if they haven't already, instead of just showing a blank screen.
 
 ## Bugs
 
@@ -57,4 +61,4 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 ## Last Thing I Was Working On
 
-Just got the plot settings and video settings windows to show from the plot. Time to add styling to this.
+Keep formatting stuff with Material UI. I only made it halfway through before going to bed. You'll see what needs to be formatted.
