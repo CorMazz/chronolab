@@ -5,7 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useState } from 'react';
 import PlotSettings from './PlotSettings';
 import { VideoStartTimeForm } from './VideoPlayer';
-import { Button, Menu as FluentMenu, MenuTrigger, MenuPopover, MenuList, MenuItem, Drawer, DrawerHeader, DrawerBody, DrawerFooter } from '@fluentui/react-components';
+import { Button, Menu as FluentMenu, MenuTrigger, MenuPopover, MenuList, MenuItem, DrawerHeader, DrawerBody, DrawerFooter, OverlayDrawer } from '@fluentui/react-components';
 
 
 
@@ -92,9 +92,9 @@ function Menu() {
           </FluentMenu>
     
           {/* Drawer for Plot Settings */}
-          <Drawer
+          <OverlayDrawer 
+            modalType="alert"
             open={isPlotSettingsOpen}
-            onOpenChange={(event, openState) => setIsPlotSettingsOpen(openState.open)}
           >
             <DrawerHeader>
               <h2>Plot Settings</h2>
@@ -108,12 +108,12 @@ function Menu() {
                 Close
               </Button>
             </DrawerFooter>
-          </Drawer>
+          </OverlayDrawer>
     
-          {/* Drawer for Video Start Time Settings */}
-          <Drawer
+          {/* OverlayDrawer for Video Start Time Settings */}
+          <OverlayDrawer
+            modalType="alert"
             open={isVideoSettingsOpen}
-            onOpenChange={(event, openState) => setIsVideoSettingsOpen(openState.open)}
           >
             <DrawerHeader>
               <h2>Video Settings</h2>
@@ -127,7 +127,7 @@ function Menu() {
                 Close
               </Button>
             </DrawerFooter>
-          </Drawer>
+          </OverlayDrawer>
         </div>
       );
 };

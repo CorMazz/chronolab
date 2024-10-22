@@ -64,7 +64,7 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
     const { handleSubmit, register, formState: { errors } } = useForm<PlotSettingsFormInputs>({
         resolver: zodResolver(plotSettingsFormInputs),
         defaultValues: {
-            load_cols: currentSettings?.load_cols ?? [],
+            // load_cols: currentSettings?.load_cols ?? [], // Handle this with defaultChecked due to a bug in fluent UI not rendering defaultValues checks correctly
             datetime_index_col: currentSettings?.datetime_index_col ?? "",
             datetime_parsing_format_string: (currentSettings?.datetime_parsing_format_string) ?? "%Y-%m-%d %H:%M:%S",
             start_time: currentSettings?.time_bounds?.start_time ?? null,
@@ -101,6 +101,7 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
               <Checkbox
                 value={column.name}
                 label={`${column.name} (${column.field_type})`}
+                defaultChecked={(currentSettings ? column.name in currentSettings.load_cols : false)}
                 {...register('load_cols')}
               />
             </div>
@@ -113,7 +114,8 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
             Datetime Index Column (x-axis)
             </Label>
             <Select 
-            {...register('datetime_index_col', { required: true })}
+                id="datetime_index_col"
+                {...register('datetime_index_col', { required: true })}
             >
             {columns.map((column) => (
                 <option key={`${column.name}-x-axis`} value={column.name}>
