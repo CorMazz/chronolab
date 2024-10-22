@@ -57,4 +57,4 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 ## Last Thing I Was Working On
 
-Just got the plot settings and video settings windows to show from the plot. Time to add styling to this.
+I was trying out Fluent UI. I like how it looks better, but it's much more a PITA to use than Material UI. I'm going to pivot back to Material UI.
