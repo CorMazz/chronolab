@@ -74,22 +74,45 @@ function Menu() {
         <div>
             <AppBar position="static" sx={{ width: "100%" }}>
                 <Toolbar>
-                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between' }}>
-                        <Button color="inherit" onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))}>
-                            Get CSV Schema
-                        </Button>
-                        <Button color="inherit" onClick={() => selectCsvFile(setCsvFilePath)}>
-                            Select CSV File
-                        </Button>
-                        <Button color="inherit" onClick={() => selectVideoFile(setVideoFilePath)}>
-                            Select Video File
-                        </Button>
-                        <Button color="inherit" onClick={togglePlotSettings}>
-                            {showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}
-                        </Button>
-                        <Button color="inherit" onClick={toggleVideoSettings}>
-                            {showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}
-                        </Button>
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        {/* Wrap the buttons in another Box with full width and distribute space */}
+                        <Box sx={{ display: 'flex', width: '100%' }}>
+                            <Button
+                                color="inherit"
+                                onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))}
+                                sx={{ flex: 1 }}  // Make the button take up equal space
+                            >
+                                Get CSV Schema
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={() => selectCsvFile(setCsvFilePath)}
+                                sx={{ flex: 1 }}
+                            >
+                                Select CSV File
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={() => selectVideoFile(setVideoFilePath)}
+                                sx={{ flex: 1 }}
+                            >
+                                Select Video File
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={togglePlotSettings}
+                                sx={{ flex: 1 }}
+                            >
+                                {showPlotSettings ? "Hide Plot Settings" : "Show Plot Settings"}
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={toggleVideoSettings}
+                                sx={{ flex: 1 }}
+                            >
+                                {showVideoSettings ? "Hide Video Settings" : "Show Video Settings"}
+                            </Button>
+                        </Box>
                     </Box>
                 </Toolbar>
             </AppBar>

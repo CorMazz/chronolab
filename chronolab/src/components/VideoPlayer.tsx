@@ -139,7 +139,16 @@ function VideoPlayer() {
             }}
         >
             {videoFilePath ? (
-                <Box sx={{ width: '100%', mb: 2 }}>
+                <Box    
+                  sx={{
+                    width: '100%',
+                    height: "fit-content",
+                    borderRadius: 2, // 8px rounded corners
+                    overflow: 'hidden', // Clips the video content to match the border radius
+                    border: '2px solid', // Optional border
+                    borderColor: 'primary.main', // Border color using theme's primary color
+                    boxShadow: 3, // Box shadow for elevation effect
+                }}>
                     <MediaController>
                         <video
                             ref={videoRef}
@@ -148,7 +157,7 @@ function VideoPlayer() {
                             preload="auto"
                             muted
                             crossOrigin=""
-                            style={{ width: '100%', borderRadius: 8 }} // Rounded corners for the video player
+                            style={{ width: '100%', borderRadius: 8 }}
                         />
                         <MediaControlBar>
                             <MediaPlayButton></MediaPlayButton>

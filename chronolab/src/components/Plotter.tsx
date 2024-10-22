@@ -7,6 +7,7 @@ import useGlobalState from '../hooks/useGlobalState';
 import { Data } from 'plotly.js';
 import { toDate } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { Box } from '@mui/material';
 
 function Plotter() {
   const { loadCsvSettings, videoStartTime } = useGlobalState({ loadCsvSettings: true, videoStartTime: true });
@@ -126,14 +127,14 @@ function Plotter() {
   if (!csvTable) return <div>Loading...</div>;
 
   return (
-    <div className="container">
+    <Box sx={{ display: 'flex', width: '100%', justifyContent: "center" }}>
       {plotData && <Plot
         data={plotData}
         layout={layout}
         onRelayout={handleRelayout}
         useResizeHandler
       />}
-    </div>
+    </Box>
   );
 }
 

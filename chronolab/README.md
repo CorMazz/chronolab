@@ -26,7 +26,7 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 ### UI Framework
 
-I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice.
+I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice. I also tried Fluent UI, which I honestly liked the aesthetic better, but was fighting bugs for way too long and decided to pivot back to Material UI. 
 
 ## Potential Features
 
@@ -62,4 +62,7 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 ## Last Thing I Was Working On
 
-Keep formatting stuff with Material UI. I only made it halfway through before going to bed. You'll see what needs to be formatted.
+Add option to load in existing settings.
+Add toggle setting to choose whether plot should follow the video.
+Then keep working on plot functionality.
+After that comes video IOI tagging.

@@ -18,17 +18,16 @@ function App() {
     <div>
       <Menu/>
       <VideoPlayer/>
-      {!isMultiwindow && (loadCsvSettings ? (
-          <Plotter/> 
-        ) : ( 
-          <Container sx={{ mt: 4}}>
-            <Box sx={{ border: '1px solid #ccc', borderRadius: 2 }}> 
+      <Container sx={{ mt: 4}}>
+        <Box sx={{ border: '1px solid #ccc', borderRadius: 2 }}> 
+          {!isMultiwindow && (loadCsvSettings ? (
+              <Plotter/> 
+            ) : ( 
               <PlotSettings/>
-            </Box>
-          </Container>
-        )
-      )}
-      
+            )
+          )}
+        </Box>
+      </Container>
     </div>
   );
 }
