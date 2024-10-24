@@ -40,7 +40,7 @@ function Plotter() {
             return {
               x: x,
               y: y,
-              type: 'scatter',
+              type: 'scattergl',
               mode: 'lines+markers',
               name: field.name, // Use field name as the trace name
             } as Data;
@@ -68,8 +68,9 @@ function Plotter() {
           range: [toZonedTime(start, "UTC"), toZonedTime(end, "UTC")],
         },
         transition: {
-          duration: 1000,
+          duration: 10,
           easing: 'cubic-in-out',
+          ordering: "traces first"
         },
       }));
     }

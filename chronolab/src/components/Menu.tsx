@@ -1,6 +1,6 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
-import useGlobalState from "../hooks/useGlobalState";
-import { selectCsvFile, selectVideoFile } from '../utils/fileSelectors';
+import useGlobalState, { waitForGlobalStateUpdate } from "../hooks/useGlobalState";
+import { selectCsvFile, selectLoadFile, selectSaveFile, selectVideoFile } from '../utils/fileSelectors';
 import { invoke } from '@tauri-apps/api/core';
 import { useState } from 'react';
 import PlotSettings from './PlotSettings';
@@ -14,12 +14,28 @@ import { AppBar, Toolbar, Button, Box, Drawer, Container } from '@mui/material';
  */
 function Menu() {
 
-    const {setCsvFilePath, setVideoFilePath, setIsMultiwindow} = useGlobalState(
-        {csvFile: true, videoFile: true, isMultiwindow: true, setOnly: true}
+    const {setCsvFilePath, setVideoFilePath, setIsMultiwindow, setSaveFilePath} = useGlobalState(
+        {saveFile: true, csvFile: true, videoFile: true, isMultiwindow: true, setOnly: true}
     );
     const [showPlotSettings, setShowPlotSettings] = useState(false);
     const [showVideoSettings, setShowVideoSettings] = useState(false);
 
+    async function saveAs() {
+        try {
+            // Start the file selection process
+            selectSaveFile(setSaveFilePath);
+    
+            // Wait for the state update event
+            const updatedState = await waitForGlobalStateUpdate("state-change--save-file-path");
+            console.log('Save file path updated:', updatedState);
+    
+            // Now that we have the updated state, proceed with saving
+            await invoke("save_app_state_to_file");
+        } catch (error) {
+            console.error('Error during save process:', error);
+            // Handle error appropriately
+        }
+    }
 
     /**
      * Let the user decide if they want to open the plot in a separate window.
@@ -79,10 +95,24 @@ function Menu() {
                         <Box sx={{ display: 'flex', width: '100%' }}>
                             <Button
                                 color="inherit"
-                                onClick={() => invoke("get_csv_schema").then((schema) => console.log(schema))}
+                                // onClick={() => invoke}
                                 sx={{ flex: 1 }}  // Make the button take up equal space
                             >
-                                Get CSV Schema
+                                New
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={saveAs}
+                                sx={{ flex: 1 }}  // Make the button take up equal space
+                            >
+                                Save As
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={selectLoadFile}
+                                sx={{ flex: 1 }}  // Make the button take up equal space
+                            >
+                                Load
                             </Button>
                             <Button
                                 color="inherit"

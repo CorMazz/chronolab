@@ -62,6 +62,7 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 ## Last Thing I Was Working On
 
+Figure out how [this guy](https://community.plotly.com/t/how-to-draw-animated-progressing-trend-lines/4971/2) used the filter transition to move the figure along.
 Add option to load in existing settings.
 Add toggle setting to choose whether plot should follow the video.
 Then keep working on plot functionality.

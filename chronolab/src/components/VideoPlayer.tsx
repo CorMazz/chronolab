@@ -111,13 +111,13 @@ function VideoPlayer() {
         // Check if current time has changed
         if (lastTime !== currentTime) {
           setLastTime(currentTime); // Update last time
-          console.log(`Current Time: ${currentTime}`); // Log for debugging
+          // console.log(`Current Time: ${currentTime}`); // Log for debugging
 
           // Send current time to backend
           invoke('emit_video_time_change', { videoTime: currentTime });
         }
       }
-    }, 500); // Poll every 500 milliseconds
+    }, 10); // Poll every 500 milliseconds
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [lastTime]);
