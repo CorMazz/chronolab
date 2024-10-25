@@ -270,7 +270,7 @@ function useVideoStartTime(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalVideoStartTime = async (videoStartTime: Date | null) => {
-        await invoke("set_app_state", { appStateField: {  videoStartTime: {value: videoStartTime } }});
+        await invoke("set_app_state", { appStateField: {  videoStartTime: { value: videoStartTime } }});
     };
 
     // Listen for global state changes if not in setOnly mode

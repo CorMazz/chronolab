@@ -26,7 +26,7 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 ### UI Framework
 
-I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice. I also tried Fluent UI, which I honestly liked the aesthetic better, but was fighting bugs for way too long and decided to pivot back to Material UI. 
+I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice. I also tried Fluent UI, which I honestly liked the aesthetic better, but was fighting bugs for way too long and decided to pivot back to Material UI.
 
 ## Potential Features
 
@@ -62,8 +62,10 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 ## Last Thing I Was Working On
 
-Figure out how [this guy](https://community.plotly.com/t/how-to-draw-animated-progressing-trend-lines/4971/2) used the filter transition to move the figure along.
-Add option to load in existing settings.
+Add toast to confirm save status
+Save button works.
+Load button works-ish, but it has permissions issues when attempting to load files that weren't specified by the user in this app instance.
+Need to add all of file manipulation buttons to a file menu.
 Add toggle setting to choose whether plot should follow the video.
 Then keep working on plot functionality.
 After that comes video IOI tagging.

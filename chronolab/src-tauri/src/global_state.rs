@@ -24,6 +24,8 @@ pub struct TimeBounds {
     pub end_time: Option<NaiveDateTime>,
 }
 
+/// Use this for deserializing all datetimes. It handles empty strings, and it automatically truncates the Z at the end of the string that the JSON frontend sends.
+/// We're not dealing with datetimes, so just get rid of the Z (which indicates UTC time).
 fn nullable_naive_datetime<'de, D>(deserializer: D) -> Result<Option<NaiveDateTime>, D::Error>
 where
     D: Deserializer<'de>,
@@ -66,7 +68,10 @@ pub enum AppStateField {
     CsvFilePath { value: Option<SafePathBuf>},
     LoadCsvSettings { value: Option<LoadCsvSettings>},
     VideoFilePath { value: Option<SafePathBuf>},
-    VideoStartTime { value: Option<NaiveDateTime>},
+    VideoStartTime { 
+        #[serde(deserialize_with = "nullable_naive_datetime")]
+        value: Option<NaiveDateTime>
+    },
     IsMultiwindow { value: bool},
 }
 
@@ -130,7 +135,7 @@ pub async fn set_app_state<'a>(
         
 
     let app_state_field: AppStateField = serde_json::from_value(app_state_field.clone())
-        .map_err(|err| format!("Failed to deserialize field_value: {}", err))?;
+        .map_err(|err| format!("Failed to deserialize field_value: {}\n\n Err: {}", app_state_field, err))?;
 
     println!("{}", app_state_field.to_string());
     let field_name = app_state_field.to_string();
@@ -168,7 +173,7 @@ pub async fn get_app_state<'a>(
 
 
     let app_state_field: AppStateField = serde_json::from_value(app_state_field.clone())
-        .map_err(|err| format!("Failed to deserialize field_value: {}", err))?;
+        .map_err(|err| format!("Failed to deserialize field_value: {}\n\n Err: {}", app_state_field, err))?;
 
     // Remember to actually update the app_state_field with the correct value from the AppState
     let app_state_field = app_state.get_field(app_state_field);
@@ -224,6 +229,9 @@ pub async fn load_app_state_from_file<'a>(app: AppHandle, state: State<'a, Mutex
         .map_err(|e| format!("Error locking app state in load_app_state_from_file: {}", e.to_string()))?;
 
     *app_state = AppState::load_from_file(file.as_ref())?; 
+
+    // Overwrite the file path just in case the user loaded a .crm file that had an out-of-date save file path on it. 
+    app_state.save_file_path = Some(file);
 
     for app_state_field in AppStateField::iter() {
         let field_name = app_state_field.to_string();

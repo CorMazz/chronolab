@@ -1,4 +1,4 @@
-import Menu from './Menu';
+import NavigationBar from './NavigationBar';
 import VideoPlayer from './VideoPlayer';
 import useGlobalState from '../hooks/useGlobalState';
 import PlotSettings from './PlotSettings';
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div>
-      <Menu/>
+      <NavigationBar/>
       <VideoPlayer/>
       <Container sx={{ mt: 4}}>
         <Box sx={{ border: '1px solid #ccc', borderRadius: 2 }}> 
