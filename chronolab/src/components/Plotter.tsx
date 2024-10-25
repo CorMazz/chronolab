@@ -27,7 +27,6 @@ function Plotter() {
       try {
         if (loadCsvSettings) {
           const parsedData = tableFromIPC(await invoke('get_csv_data'));
-          console.log("Parsed Data");
           setCsvTable(parsedData);
 
           // Extracting the first column as x (timestamps) and subsequent columns as y (data series)
@@ -58,8 +57,6 @@ function Plotter() {
 
   useEffect(() => {
     async function setAxesRange(start: Date, end: Date) {
-      console.log("Called setAxesRange");
-      console.log(`Start: ${start} \n End: ${end}`);
       setLayout((prevLayout) => ({
         ...prevLayout,
         xaxis: {
@@ -79,12 +76,11 @@ function Plotter() {
     async function setupListener() {
       const unlisten = await listen<number>('video-time-change', (event) => {
         if (!videoStartTime) {
-          console.log("video-start-time listener event ignored") 
           return;
         }
 
-        console.log("Video Time Change Listener Internal Calls:")
-        console.log(`    Video time is now ${event.payload} seconds from the beginning.`);
+        // console.log("Video Time Change Listener Internal Calls:")
+        // console.log(`    Video time is now ${event.payload} seconds from the beginning.`);
         // console.log("    videoStartTime:", videoStartTime);
         // console.log("    typeof videoStartTime:", typeof(videoStartTime));
         // console.log("    Event payload -10:", -10 + event.payload);
@@ -106,22 +102,18 @@ function Plotter() {
     }
 
     if (videoStartTime) {
-      console.log("Video Time Change Listener Setup")
       setupListener();
     }
 
   }, [videoStartTime]); // Set up listener only when videoStartTime changes
 
   const handleRelayout = (eventData: any) => {
-    console.log("Relayout noted:", eventData);
+    // console.log("Relayout noted:", eventData);
   };
 
   // Adds seconds to a JS date object.
   function addSeconds(date: Date, seconds: number) {
-    console.log("Called add seconds");
-    console.log("    addSeconds Date:", date);
     const newDate = new Date(date.getTime() + seconds * 1000);
-    console.log("    New Date:", newDate)
     return newDate
   }
 

@@ -21,13 +21,12 @@
       
       "assetProtocol": {
         "enable": true,
-        "scope": []
+        "scope": ["**"]
       },
       "csp": 
         {
           "default-src": "'self' ipc: http://ipc.localhost",
-          "media-src": "'self' asset: https://asset.localhost",
-          "style-src": "'unsafe-inline'"
+          "media-src": "'self' asset: http://asset.localhost https://asset.localhost mediafile: *"
         }
     }
   },

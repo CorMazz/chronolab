@@ -55,6 +55,8 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 6. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
 7. Allow users to drag the plot window and the video window to different places.
 8. Make the PlotSettings tell the user to select a CSV file if they haven't already, instead of just showing a blank screen.
+9. When going to release, get all the CSP working.
+10. Remove the allow inline-scripts CSP.
 
 ## Bugs
 

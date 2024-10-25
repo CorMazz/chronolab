@@ -15,79 +15,81 @@ import {
 import { Container, Button, Box, Typography, TextField } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
 import { selectVideoFile } from "../utils/fileSelectors";
-import {z} from 'zod';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { parseJSON } from "date-fns";
+import { Controller, useForm } from "react-hook-form";
+import { format } from "date-fns";
+import { dateToUtcString, parseUtcString } from "../utils/datetimeHandlers";
 
-// This is used to validate the form inputs
-const videoStartTimeFormInputs = z.object({
-    video_start_time: z.preprocess(
-      // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
-      (val) => (val == null || val === "" )  ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
-      z.date().nullable()
-  ),
-})
-
-type VideoStartTimeFormInputs = z.infer<typeof videoStartTimeFormInputs>;
-
-// ##############################################################################################################
-// Child Component
-// ##############################################################################################################
+type VideoStartTimeFormInputs = {
+  video_start_time: string | null;
+};
 
 export function VideoStartTimeForm() {
-    const { videoStartTime, setVideoStartTime } = useGlobalState({videoStartTime: true, setOnly: false});
+  const { videoStartTime, setVideoStartTime } = useGlobalState({ videoStartTime: true, setOnly: false });
 
-    const { handleSubmit, register, formState: { errors } } = useForm<VideoStartTimeFormInputs>(
-      {
-        resolver: zodResolver(videoStartTimeFormInputs),
-        defaultValues: { video_start_time: videoStartTime }
+  const { control, handleSubmit, reset } = useForm<VideoStartTimeFormInputs>({
+      defaultValues: {
+          video_start_time: null
       }
-    );
+  });
 
-    const onFormSubmit = (data: VideoStartTimeFormInputs) => {
-      console.log("Video Start Time Form Submission Data:")
-      console.log("   Video Start Time:", data.video_start_time);
-      console.log("   Video Start Time Type:", typeof(data.video_start_time));
+  // Set initial value when videoStartTime changes
+  useEffect(() => {
+      if (videoStartTime instanceof Date) {
+          reset({
+              video_start_time: dateToUtcString(videoStartTime)
+          });
+      }
+  }, [videoStartTime, reset]);
+
+  const onSubmit = (data: VideoStartTimeFormInputs) => {
+      // Convert the string to a Date object before saving to global state
+      const dateValue = data.video_start_time ? parseUtcString(data.video_start_time) : null;
+      
       if (setVideoStartTime) {
-        setVideoStartTime(data.video_start_time)
-      } else {
-        console.error("Unable to set the video start time due to an undefined global state setter.")
+          setVideoStartTime(dateValue);
       }
-      };
+  };
 
-    return (
-<form onSubmit={handleSubmit(onFormSubmit)}>
-            {/* Video Start Time */}
-            <Box mb={3}>
-                <Typography variant="h6" gutterBottom>
-                    Input the Video Start Time
-                </Typography>
-                <TextField
-                    fullWidth
-                    id="video_start_time"
-                    label="Video Start Time"
-                    type="datetime-local"
-                    slotProps={{
-                      htmlInput: {step: "1"},
-                      inputLabel: {shrink: true},
-                    }}
-                    {...register("video_start_time")}
-                    error={!!errors.video_start_time}
-                    helperText={errors.video_start_time ? errors.video_start_time.message : ""}
-                />
-            </Box>
+  return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+          <Box mb={3}>
+              <Typography variant="h6" gutterBottom>
+                  Input the Video Start Time
+              </Typography>
+              
+              <Controller
+                  name="video_start_time"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                      <TextField
+                          {...field}
+                          fullWidth
+                          type="datetime-local"
+                          label="Video Start Time"
+                          value={field.value ?? ''}
+                          slotProps={{
+                            htmlInput: { step: "1" },
+                            inputLabel: { shrink: true },
+                          }}
+                          error={!!error}
+                          helperText={error?.message}
+                      />
+                  )}
+              />
+          </Box>
 
-            {/* Submit Button */}
-            <Box textAlign="center" mt={2}>
-                <Button variant="contained" color="primary" type="submit">
-                    Submit
-                </Button>
-            </Box>
-        </form>
-    );
+          <Box textAlign="center" mt={2}>
+              <Button 
+                  variant="contained" 
+                  color="primary" 
+                  type="submit"
+              >
+                  Set Video Start Time
+              </Button>
+          </Box>
+      </form>
+  );
 }
-
 
 
 

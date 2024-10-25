@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { parseJSON } from "date-fns";
+import { parseUtcString } from "../utils/datetimeHandlers";
 
 // Enable global state for the path of the CSV file
 function useSaveFilePath(setOnly: boolean = false): { 
@@ -106,6 +106,30 @@ export interface TimeBounds {
     end_time?: Date | null;
 }
 
+// Helper function to convert time bounds with string dates to Date objects
+// Otherwise the datetimes don't get parsed when listening for the LoadCsvSettinsg object
+function parseTimeBounds(settings: LoadCsvSettings | undefined): LoadCsvSettings | undefined {
+    
+    if (!settings) return undefined;
+    if (!settings.time_bounds) return settings;
+    const parsed_settings = {
+        ...settings,
+        time_bounds: {
+            start_time: settings.time_bounds.start_time 
+                ? (typeof settings.time_bounds.start_time === 'string'
+                    ? parseUtcString(settings.time_bounds.start_time + "Z")
+                    : settings.time_bounds.start_time)
+                : null,
+            end_time: settings.time_bounds.end_time 
+                ? (typeof settings.time_bounds.end_time === 'string'
+                    ? parseUtcString(settings.time_bounds.end_time + "Z")
+                    : settings.time_bounds.end_time)
+                : null
+        }
+    };
+    return parsed_settings
+}
+
 // Enable global state for LoadCsvSettings
 function useLoadCsvSettings(setOnly: boolean = false): { 
     loadCsvSettings: LoadCsvSettings | undefined; 
@@ -119,8 +143,7 @@ function useLoadCsvSettings(setOnly: boolean = false): {
         const fetchGlobalState = async () => {
             try {
                 const current_global_state = await invoke<LoadCsvSettings>("get_app_state", { appStateField: {  loadCsvSettings: {value: null } }});
-                console.log("Current Global useLoadCsvSettings:", current_global_state);
-                setLocalLoadCsvSettings(current_global_state);
+                setLocalLoadCsvSettings(parseTimeBounds(current_global_state));
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
             }
@@ -257,8 +280,7 @@ function useVideoStartTime(setOnly: boolean = false): {
         const fetchGlobalState = async () => {
             try {
                 const current_global_state = await invoke<string | null>("get_app_state",  { appStateField: {  videoStartTime: {value: null } }});
-                console.log("Received videoStartTime", current_global_state);
-                setLocalVideoStartTime(current_global_state ? parseJSON(current_global_state) : null);
+                setLocalVideoStartTime(current_global_state ? parseUtcString(current_global_state) : null);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
                 setLocalVideoStartTime(null); // Default value on error
@@ -278,7 +300,7 @@ function useVideoStartTime(setOnly: boolean = false): {
         if (setOnly) return; // Skip listener setup if only setting state
 
         const unlisten = listen<string | null>("state-change--video-start-time", (event) => {
-            setLocalVideoStartTime(event.payload ? parseJSON(event.payload) : null); 
+            setLocalVideoStartTime(event.payload ? parseUtcString(event.payload) : null); 
         });
 
         // Cleanup the listener when the component unmounts

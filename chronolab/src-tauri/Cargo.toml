@@ -26,4 +26,5 @@ tauri-plugin-dialog = "2"
 polars = { version = "0.43.1", features = ["ipc", "json", "lazy", "polars-io", "strings"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 strum = { version = "0.26.3", features = ["derive"] }
+tauri-plugin-fs = "2"
 

@@ -40,6 +40,7 @@ export function FileMenu() {
 
     const handleNewRequest = async () => {
         handleMenuClose();
+        console.log("TODO: Implement: isModified check")
         // TODO: Implement actual modification check
         setConfirmNewDialogOpen(true);
     };
@@ -47,7 +48,7 @@ export function FileMenu() {
     const createNewFile = async () => {
         try {
             // TODO: Implement new file creation
-            console.log('New file creation not implemented');
+            invoke("clear_app_state")
         } catch (error) {
             console.error('Error creating new file:', error);
         }
