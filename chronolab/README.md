@@ -60,14 +60,10 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 ## Bugs
 
-1. Show video start time default value does not persist.
-
 ## Last Thing I Was Working On
 
 Add toast to confirm save status
-Save button works.
-Load button works-ish, but it has permissions issues when attempting to load files that weren't specified by the user in this app instance.
-Need to add all of file manipulation buttons to a file menu.
 Add toggle setting to choose whether plot should follow the video.
+Add time range slider for video/plot data following.
 Then keep working on plot functionality.
 After that comes video IOI tagging.
