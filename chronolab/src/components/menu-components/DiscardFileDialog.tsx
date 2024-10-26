@@ -1,13 +1,14 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Warning as WarningIcon } from '@mui/icons-material';
 
-interface NewFileDialogProps {
+interface DiscardFileDialogProps {
     open: boolean;
     onClose: () => void;
     onConfirm: () => void;
 }
 
-export function NewFileDialog({ open, onClose, onConfirm }: NewFileDialogProps) {
+// Warn the user if they're going to overwrite unsaved changes. 
+export function DiscardFileDialog({ open, onClose, onConfirm }: DiscardFileDialogProps) {
     return (
         <Dialog
             open={open}
@@ -21,14 +22,14 @@ export function NewFileDialog({ open, onClose, onConfirm }: NewFileDialogProps) 
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    You have unsaved changes. Creating a new file will discard these changes. 
+                    You have unsaved changes. This action will discard these changes. 
                     Do you want to proceed?
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cancel</Button>
                 <Button onClick={onConfirm} variant="contained" color="primary" autoFocus>
-                    Create New File
+                    Continue
                 </Button>
             </DialogActions>
         </Dialog>

@@ -235,9 +235,11 @@ pub async fn set_app_state_field<'a>(
             )
         })?;
 
-    println!("{}", app_state_field.to_string());
     let field_name = app_state_field.to_string();
     app_state.set_field(app_state_field.clone());
+
+    // Note that the state is now modified
+    set_is_modified_since_last_save(&app, app_state, true)?;
 
     // We have no choice but to match on all variants to extract the value. Such is Rust...
     match app_state_field {
@@ -308,6 +310,7 @@ pub async fn clear_app_state<'a>(app: AppHandle, state: State<'a, Mutex<AppState
         )
     })?;
 
+    // This automatically notes that the state is not modified
     *app_state = AppState::default();
 
     broadcast_complete_global_state_change(&app, app_state)?;
@@ -321,7 +324,7 @@ pub async fn clear_app_state<'a>(app: AppHandle, state: State<'a, Mutex<AppState
 
 /// If you want to save to a different file, update the file name in the global state first from a frontend set_app_state invocation.
 #[tauri::command]
-pub async fn save_app_state_to_file<'a>(state: State<'a, Mutex<AppState>>) -> Result<(), String> {
+pub async fn save_app_state_to_file<'a>(app: AppHandle, state: State<'a, Mutex<AppState>>) -> Result<(), String> {
     let app_state = state.lock().map_err(|e| {
         format!(
             "Error locking app state in save_app_state_to_file: {}",
@@ -330,6 +333,10 @@ pub async fn save_app_state_to_file<'a>(state: State<'a, Mutex<AppState>>) -> Re
     })?;
 
     app_state.save_to_file()?;
+
+    // Note that the state has not been modified
+    set_is_modified_since_last_save(&app, app_state, false)?;
+
     Ok(())
 }
 
@@ -355,6 +362,9 @@ pub async fn load_app_state_from_file<'a>(
 
     // Overwrite the file path just in case the user loaded a .crm file that had an out-of-date save file path on it.
     app_state.save_file_path = Some(file.into());
+
+    // Note that the state has not been modified
+    app_state.set_field(AppStateField::IsModifiedSinceLastSave { value: IsModifiedSinceLastSave::from(false) });
 
     broadcast_complete_global_state_change(&app, app_state)?;
 
@@ -463,8 +473,15 @@ fn to_json<T: Serialize>(payload: T, field_name: String) -> Result<Value, String
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
-// Broadcast Complete Global State Change
+// Set Is Modified Since Last Save
 // ---------------------------------------------------------------------------------------------------------------------------------------------
+
+/// Used to set and emit if the app state has been modified since the last save
+fn set_is_modified_since_last_save(app: &AppHandle, mut app_state: MutexGuard<'_, AppState>, value: bool) -> Result<(), String> {
+    app_state.set_field(AppStateField::IsModifiedSinceLastSave { value: IsModifiedSinceLastSave::from(true) });
+    emit_app_state_update(&app, AppStateField::IsModifiedSinceLastSave{ value: IsModifiedSinceLastSave::from(value) }.to_string() , value)?; // The value within the AppStateField doesn't matter
+    Ok(())
+}
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Broadcast Complete Global State Change
