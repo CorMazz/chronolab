@@ -1,4 +1,5 @@
 use chrono::NaiveDateTime;
+use derive_more::derive::{From, Into};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 use std::{
@@ -48,16 +49,39 @@ where
     }
 }
 
+/// We are using the NewType pattern to make the compiler enforce that developers store the correct state value in AppState fields that share the same primitive type
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct SaveFilePath(SafePathBuf);
+
+impl AsRef<Path> for SaveFilePath {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct CsvFilePath(SafePathBuf);
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct VideoFilePath(SafePathBuf);
+#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
+pub struct IsMultiwindow(bool);
+#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
+pub struct IsModifiedSinceLastSave(bool);
+
 /// When adding fields to this struct, ensure you also add them to the AppStateField enum.
+/// Anywhere that there are two attributes with the same type, create a new type to enforce code correctness at compile time. 
+/// Add #[serde(default)] for traits that we do not care if they are missing when loading from a file.
 #[derive(Default, Serialize, Deserialize)]
 pub struct AppState {
     // Danger: Ensure these are all captured in the AppStateField enum
-    pub save_file_path: Option<SafePathBuf>,
-    pub csv_file_path: Option<SafePathBuf>,
+    pub save_file_path: Option<SaveFilePath>,
+    pub csv_file_path: Option<CsvFilePath>,
     pub load_csv_settings: Option<LoadCsvSettings>,
-    pub video_file_path: Option<SafePathBuf>,
+    pub video_file_path: Option<VideoFilePath>,
     pub video_start_time: Option<NaiveDateTime>,
-    pub is_multiwindow: bool,
+    #[serde(default)]
+    pub is_multiwindow: IsMultiwindow,
+    #[serde(default)]
+    pub is_modified_since_last_save: IsModifiedSinceLastSave,
     // Danger: Ensure these are all captured in the AppStateField enum
 }
 
@@ -70,23 +94,26 @@ pub struct AppState {
 #[strum(serialize_all = "kebab-case")] // When just getting the name using strum's .to_string(), load them as kebab-case to match Tauri event naming convention
 pub enum AppStateField {
     SaveFilePath {
-        value: Option<SafePathBuf>,
+        value: Option<SaveFilePath>,
     },
     CsvFilePath {
-        value: Option<SafePathBuf>,
+        value: Option<CsvFilePath>,
     },
     LoadCsvSettings {
         value: Option<LoadCsvSettings>,
     },
     VideoFilePath {
-        value: Option<SafePathBuf>,
+        value: Option<VideoFilePath>,
     },
     VideoStartTime {
         #[serde(deserialize_with = "nullable_naive_datetime")]
         value: Option<NaiveDateTime>,
     },
     IsMultiwindow {
-        value: bool,
+        value: IsMultiwindow,
+    },
+    IsModifiedSinceLastSave {
+        value: IsModifiedSinceLastSave,
     },
 }
 
@@ -99,6 +126,7 @@ impl AppState {
             AppStateField::VideoFilePath { value } => self.video_file_path = value,
             AppStateField::VideoStartTime { value } => self.video_start_time = value,
             AppStateField::IsMultiwindow { value } => self.is_multiwindow = value,
+            AppStateField::IsModifiedSinceLastSave { value } => self.is_modified_since_last_save = value,
         }
     }
 
@@ -122,6 +150,9 @@ impl AppState {
             },
             AppStateField::IsMultiwindow { .. } => AppStateField::IsMultiwindow {
                 value: self.is_multiwindow.clone(),
+            },
+            AppStateField::IsModifiedSinceLastSave{ .. } => AppStateField::IsModifiedSinceLastSave {
+                value: self.is_modified_since_last_save.clone(),
             },
         }
     }
@@ -186,6 +217,7 @@ pub async fn set_app_state<'a>(
         AppStateField::VideoFilePath { value } => emit_app_state_update(&app, field_name, value)?,
         AppStateField::VideoStartTime { value } => emit_app_state_update(&app, field_name, value)?,
         AppStateField::IsMultiwindow { value } => emit_app_state_update(&app, field_name, value)?,
+        AppStateField::IsModifiedSinceLastSave { value } => emit_app_state_update(&app, field_name, value)?,
     };
 
     Ok(())
@@ -235,6 +267,7 @@ pub async fn get_app_state<'a>(
         AppStateField::VideoFilePath { value } => Ok(to_json(value, field_name)?),
         AppStateField::VideoStartTime { value } => Ok(to_json(value, field_name)?),
         AppStateField::IsMultiwindow { value } => Ok(to_json(value, field_name)?),
+        AppStateField::IsModifiedSinceLastSave { value } => Ok(to_json(value, field_name)?),
     }
 }
 
@@ -297,7 +330,7 @@ pub async fn load_app_state_from_file<'a>(
     *app_state = AppState::load_from_file(file.as_ref())?;
 
     // Overwrite the file path just in case the user loaded a .crm file that had an out-of-date save file path on it.
-    app_state.save_file_path = Some(file);
+    app_state.save_file_path = Some(file.into());
 
     broadcast_complete_global_state_change(&app, app_state)?;
 
@@ -330,6 +363,9 @@ fn broadcast_complete_global_state_change(app: &AppHandle, app_state: MutexGuard
                 emit_app_state_update(app, field_name, value)?
             }
             AppStateField::IsMultiwindow { value } => {
+                emit_app_state_update(app, field_name, value)?
+            }
+            AppStateField::IsModifiedSinceLastSave { value } => {
                 emit_app_state_update(app, field_name, value)?
             }
         };
