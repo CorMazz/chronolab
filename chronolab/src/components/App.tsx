@@ -4,7 +4,6 @@ import useGlobalState from '../hooks/useGlobalState';
 import PlotSettings from './PlotSettings';
 import Plotter from './Plotter';
 import { Box, Container } from '@mui/material';
-import { ToastProvider } from './ToastContext';
 
 function App() {
 
@@ -17,20 +16,18 @@ function App() {
 
   return (
     <div>
-      <ToastProvider>
-        <NavigationBar/>
-        <VideoPlayer/>
-        <Container sx={{ mt: 4}}>
-          <Box sx={{ border: '1px solid #ccc', borderRadius: 2 }}> 
-            {!isMultiwindow && (loadCsvSettings ? (
-                <Plotter/> 
-              ) : ( 
-                <PlotSettings/>
-              )
-            )}
-          </Box>
-        </Container>
-      </ToastProvider>
+      <NavigationBar/>
+      <VideoPlayer/>
+      <Container sx={{ mt: 4}}>
+        <Box sx={{ border: '1px solid #ccc', borderRadius: 2 }}> 
+          {!isMultiwindow && (loadCsvSettings ? (
+              <Plotter/> 
+            ) : ( 
+              <PlotSettings/>
+            )
+          )}
+        </Box>
+      </Container>
     </div>
   );
 }

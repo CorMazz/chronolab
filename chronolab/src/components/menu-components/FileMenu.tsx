@@ -15,13 +15,14 @@ import {
     FolderOpen as OpenIcon,
 } from '@mui/icons-material';
 import { invoke } from '@tauri-apps/api/core';
-import { selectLoadFile, selectSaveFile } from '../../utils/fileSelectors';
 import useGlobalState, { waitForGlobalStateUpdate } from "../../hooks/useGlobalState";
 import { DiscardFileDialog } from './DiscardFileDialog';
 import { useToast } from '../../hooks/useToast';
+import { useFileOperations } from '../../hooks/useFileOperations';
 
 export function FileMenu() {
     const { showToast } = useToast();
+    const { selectLoadFile, selectSaveFile } = useFileOperations();
 
     const { isModifiedSinceLastSave, saveFilePath, setSaveFilePath } = useGlobalState({
         isModified: true,

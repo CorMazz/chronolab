@@ -3,8 +3,9 @@ import {
     TableChart as CsvIcon,
     VideoFile as VideoIcon,
 } from '@mui/icons-material';
-import { selectCsvFile, selectVideoFile } from '../../utils/fileSelectors';
+
 import useGlobalState from "../../hooks/useGlobalState";
+import { useFileOperations } from '../../hooks/useFileOperations';
 
 export function FileSelectionButtons() {
     const { setCsvFilePath, setVideoFilePath } = useGlobalState({
@@ -12,6 +13,7 @@ export function FileSelectionButtons() {
         videoFile: true,
         setOnly: true
     });
+    const { selectCsvFile, selectVideoFile } = useFileOperations();
 
     return (
         <>

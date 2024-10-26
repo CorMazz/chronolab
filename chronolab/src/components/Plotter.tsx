@@ -79,15 +79,6 @@ function Plotter() {
           return;
         }
 
-        // console.log("Video Time Change Listener Internal Calls:")
-        // console.log(`    Video time is now ${event.payload} seconds from the beginning.`);
-        // console.log("    videoStartTime:", videoStartTime);
-        // console.log("    typeof videoStartTime:", typeof(videoStartTime));
-        // console.log("    Event payload -10:", -10 + event.payload);
-        // console.log("    Event payload +10:", 10 + event.payload);
-        // console.log("    addSeconds -10", addSeconds(videoStartTime, -10 + event.payload))
-        // console.log("    addSeconds +10", addSeconds(videoStartTime, 10 + event.payload))
-
         setAxesRange(
           addSeconds(videoStartTime, -10 + event.payload),
           addSeconds(videoStartTime, 10 + event.payload)
@@ -96,7 +87,6 @@ function Plotter() {
 
       // Clean up the event listener when the component is unmounted
       return () => {
-        console.log("video-time-change listener torn down")
         unlisten(); // Properly clean up listener
       };
     }
@@ -108,7 +98,6 @@ function Plotter() {
   }, [videoStartTime]); // Set up listener only when videoStartTime changes
 
   const handleRelayout = (eventData: any) => {
-    // console.log("Relayout noted:", eventData);
   };
 
   // Adds seconds to a JS date object.

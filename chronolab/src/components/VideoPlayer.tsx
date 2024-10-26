@@ -14,29 +14,32 @@ import {
 } from 'media-chrome/react';
 import { Container, Button, Box, Typography, TextField } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
-import { selectVideoFile } from "../utils/fileSelectors";
 import { Controller, useForm } from "react-hook-form";
-import { format } from "date-fns";
 import { dateToUtcString, parseUtcString } from "../utils/datetimeHandlers";
+import { useFileOperations } from "../hooks/useFileOperations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-type VideoStartTimeFormInputs = {
-  video_start_time: string | null;
-};
+const videoStartTimeSchema = z.object({
+    video_start_time: z.string().min(1, "Video start time is required"),
+});
+
+type VideoStartTimeFormInputs = z.infer<typeof videoStartTimeSchema>;
 
 export function VideoStartTimeForm() {
   const { videoStartTime, setVideoStartTime } = useGlobalState({ videoStartTime: true, setOnly: false });
 
   const { control, handleSubmit, reset } = useForm<VideoStartTimeFormInputs>({
-      defaultValues: {
-          video_start_time: null
-      }
-  });
-
+    defaultValues: {
+        video_start_time: undefined
+    },
+    resolver: zodResolver(videoStartTimeSchema)
+});
   // Set initial value when videoStartTime changes
   useEffect(() => {
       if (videoStartTime instanceof Date) {
           reset({
-              video_start_time: dateToUtcString(videoStartTime)
+              video_start_time: dateToUtcString(videoStartTime) ?? undefined
           });
       }
   }, [videoStartTime, reset]);
@@ -76,6 +79,7 @@ export function VideoStartTimeForm() {
                       />
                   )}
               />
+
           </Box>
 
           <Box textAlign="center" mt={2}>
@@ -96,6 +100,7 @@ export function VideoStartTimeForm() {
 function VideoPlayer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [lastTime, setLastTime] = useState<number | null>(null);
+  const { selectVideoFile } = useFileOperations();
   const {videoFilePath, setVideoFilePath, videoStartTime} = useGlobalState({videoFile: true, videoStartTime: true});
 
 
@@ -113,7 +118,6 @@ function VideoPlayer() {
         // Check if current time has changed
         if (lastTime !== currentTime) {
           setLastTime(currentTime); // Update last time
-          // console.log(`Current Time: ${currentTime}`); // Log for debugging
 
           // Send current time to backend
           invoke('emit_video_time_change', { videoTime: currentTime });

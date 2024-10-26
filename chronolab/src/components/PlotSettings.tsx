@@ -1,13 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import useGlobalState, { LoadCsvSettings } from "../hooks/useGlobalState";
+import useGlobalState from "../hooks/useGlobalState";
+import { LoadCsvSettings } from "../types/appState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText, MenuItem, TextField, Typography } from "@mui/material";
-import { selectCsvFile } from "../utils/fileSelectors";
 import OptionalButton from "./custom-ui-components/OptionalButton";
 import { parseUtcString, dateToUtcString } from "../utils/datetimeHandlers";
+import { useFileOperations } from "../hooks/useFileOperations";
 
 
 interface DataFrameColumn {
@@ -74,9 +75,6 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
                 end_time: parseUtcString(data.end_time),
             }
         };
-
-        console.log("form submitted:", loadCsvSettings);
-
         onSubmit(loadCsvSettings);
     };
 
@@ -200,6 +198,7 @@ function PlotSettingsForm({ columns, onSubmit, currentSettings }: PlotSettingsFo
 // ##############################################################################################################
 
 function PlotSettings() {
+    const { selectCsvFile } = useFileOperations();
     const { loadCsvSettings, setLoadCsvSettings, csvFilePath, setCsvFilePath } = useGlobalState({ csvFile: true, loadCsvSettings: true, setOnly: false })
     const [columns, setColumns] = useState<DataFrameColumn[] | undefined>(undefined);
 
