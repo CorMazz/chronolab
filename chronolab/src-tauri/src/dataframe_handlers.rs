@@ -22,10 +22,11 @@ pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<Vec<Sch
         )
     })?;
 
-    let file_path = state
+    let file_path: tauri::path::SafePathBuf = state
         .csv_file_path
         .clone()
-        .ok_or("CSV file path has not been set yet.")?;
+        .ok_or("CSV file path has not been set yet.")?
+        .into();
 
     let mut lf = LazyCsvReader::new(file_path)
         .with_infer_schema_length(Some(10000))
@@ -58,10 +59,12 @@ pub async fn get_csv_data(state: State<'_, Mutex<AppState>>) -> Result<Response,
         )
     })?;
 
-    let file_path = state
+    let file_path: tauri::path::SafePathBuf = state
         .csv_file_path
         .clone()
-        .ok_or("CSV file path has not been set yet")?;
+        .ok_or("CSV file path has not been set yet")?
+        .into();
+
     let load_csv_settings: LoadCsvSettings = state
         .load_csv_settings
         .clone()
