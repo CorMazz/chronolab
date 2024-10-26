@@ -18,15 +18,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { selectLoadFile, selectSaveFile } from '../../utils/fileSelectors';
 import useGlobalState, { waitForGlobalStateUpdate } from "../../hooks/useGlobalState";
 import { DiscardFileDialog } from './DiscardFileDialog';
+import { useToast } from '../../hooks/useToast';
 
 export function FileMenu() {
-    const { setSaveFilePath } = useGlobalState({
-        saveFile: true,
-        setOnly: true
-    });
+    const { showToast } = useToast();
 
-    const { isModifiedSinceLastSave } = useGlobalState({
+    const { isModifiedSinceLastSave, saveFilePath, setSaveFilePath } = useGlobalState({
         isModified: true,
+        saveFile: true,
         setOnly: false
     });
 
@@ -64,9 +63,11 @@ export function FileMenu() {
 
     const createNewFile = async () => {
         try {
-            invoke("clear_app_state")
+            invoke("clear_app_state");
+            showToast("App cleared", "success");
         } catch (error) {
             console.error('Error creating new file:', error);
+            showToast(`Error: ${error}`, "error");
         }
     };
 
@@ -88,11 +89,17 @@ export function FileMenu() {
     // ---------------------------------------------------------------------------------------------------------------------------------------------
 
     const handleSave = async () => {
-        try {
-            await invoke("save_app_state_to_file");
-            handleMenuClose();
-        } catch (error) {
-            console.error('Error during save:', error);
+        if (!saveFilePath) {
+            handleSaveAs()
+        } else {
+            try {
+                await invoke("save_app_state_to_file");
+                handleMenuClose();
+                showToast("Saved", "success");
+            } catch (error) {
+                console.error('Error during save:', error);
+                showToast(`Error: ${error}`, "error");
+            }
         }
     };
 
@@ -102,8 +109,10 @@ export function FileMenu() {
             await waitForGlobalStateUpdate("state-change--save-file-path");
             await invoke("save_app_state_to_file");
             handleMenuClose();
+            showToast("Saved", "success");
         } catch (error) {
             console.error('Error during save process:', error);
+            showToast(`Error: ${error}`, "error");
         }
     };
 
