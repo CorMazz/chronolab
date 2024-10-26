@@ -5,6 +5,12 @@ use serde::Serialize;
 use std::sync::Mutex;
 use tauri::{ipc::Response, State};
 
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Structs
+// #############################################################################################################################################
+// #############################################################################################################################################
+
 /// A custom struct to put a schema into, because we need it to be serializeable to send it to our JS frontend.
 #[derive(Serialize)]
 pub struct SchemaField {
@@ -12,8 +18,18 @@ pub struct SchemaField {
     field_type: String,
 }
 
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Tauri Commands
+// #############################################################################################################################################
+// #############################################################################################################################################
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Get CSV Schema
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
 #[tauri::command]
-/// Scan the CSV to get some information about it
+/// Scan the CSV to get some information about it. Frontend uses this to let the user choose what columns they want to load from the .csv
 pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<Vec<SchemaField>, String> {
     let state = state.lock().map_err(|e| {
         format!(
@@ -22,10 +38,11 @@ pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<Vec<Sch
         )
     })?;
 
-    let file_path = state
+    let file_path: tauri::path::SafePathBuf = state
         .csv_file_path
         .clone()
-        .ok_or("CSV file path has not been set yet.")?;
+        .ok_or("CSV file path has not been set yet.")?
+        .into();
 
     let mut lf = LazyCsvReader::new(file_path)
         .with_infer_schema_length(Some(10000))
@@ -47,6 +64,10 @@ pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<Vec<Sch
     Ok(schema_vec)
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Get CSV Data
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
 /// Loads the DataFrame per the load_csv_settings in the AppStateSerializes the Polars DataFrame to Apache Arrow format and then sends that binary response in a Tauri array buffer via IPC
 /// In theory that is faster than using JSON.
 #[tauri::command]
@@ -58,10 +79,12 @@ pub async fn get_csv_data(state: State<'_, Mutex<AppState>>) -> Result<Response,
         )
     })?;
 
-    let file_path = state
+    let file_path: tauri::path::SafePathBuf = state
         .csv_file_path
         .clone()
-        .ok_or("CSV file path has not been set yet")?;
+        .ok_or("CSV file path has not been set yet")?
+        .into();
+
     let load_csv_settings: LoadCsvSettings = state
         .load_csv_settings
         .clone()

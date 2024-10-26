@@ -17,7 +17,7 @@ import {
 import { invoke } from '@tauri-apps/api/core';
 import { selectLoadFile, selectSaveFile } from '../../utils/fileSelectors';
 import useGlobalState, { waitForGlobalStateUpdate } from "../../hooks/useGlobalState";
-import { NewFileDialog } from './NewFileDialog';
+import { DiscardFileDialog } from './DiscardFileDialog';
 
 export function FileMenu() {
     const { setSaveFilePath } = useGlobalState({
@@ -25,9 +25,20 @@ export function FileMenu() {
         setOnly: true
     });
 
+    const { isModifiedSinceLastSave } = useGlobalState({
+        isModified: true,
+        setOnly: false
+    });
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [confirmNewDialogOpen, setConfirmNewDialogOpen] = useState(false);
+    const [confirmNewFileDiscardDialogOpen, setConfirmNewFileDiscardDialogOpen] = useState(false);
+    const [confirmLoadFileDiscardDialogOpen, setConfirmLoadFileDiscardDialogOpen] = useState(false);
+
     
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+    // File Menu Display Handlers
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+
     const menuOpen = Boolean(anchorEl);
 
     const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -38,21 +49,43 @@ export function FileMenu() {
         setAnchorEl(null);
     };
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+    // NewFile Handlers
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+
     const handleNewRequest = async () => {
         handleMenuClose();
-        console.log("TODO: Implement: isModified check")
-        // TODO: Implement actual modification check
-        setConfirmNewDialogOpen(true);
+        if (isModifiedSinceLastSave) {
+            setConfirmNewFileDiscardDialogOpen(true);
+        } else {
+            await createNewFile();
+        }
     };
 
     const createNewFile = async () => {
         try {
-            // TODO: Implement new file creation
             invoke("clear_app_state")
         } catch (error) {
             console.error('Error creating new file:', error);
         }
     };
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+    // Load File Handlers
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+
+    const handleLoadRequest = async () => {
+        handleMenuClose();
+        if (isModifiedSinceLastSave) {
+            setConfirmLoadFileDiscardDialogOpen(true);
+        } else {
+            selectLoadFile();
+        }
+    };
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+    // Save and SaveAs Handlers
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
 
     const handleSave = async () => {
         try {
@@ -73,6 +106,10 @@ export function FileMenu() {
             console.error('Error during save process:', error);
         }
     };
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+    // Rendering
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
 
     return (
         <>
@@ -120,18 +157,26 @@ export function FileMenu() {
                     <ListItemIcon><SaveAsIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Save As...</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={() => { selectLoadFile(); handleMenuClose(); }}>
+                <MenuItem onClick={handleLoadRequest}>
                     <ListItemIcon><OpenIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Open...</ListItemText>
                 </MenuItem>
             </Menu>
 
-            <NewFileDialog
-                open={confirmNewDialogOpen}
-                onClose={() => setConfirmNewDialogOpen(false)}
+            <DiscardFileDialog
+                open={confirmNewFileDiscardDialogOpen}
+                onClose={() => setConfirmNewFileDiscardDialogOpen(false)}
                 onConfirm={async () => {
-                    setConfirmNewDialogOpen(false);
+                    setConfirmNewFileDiscardDialogOpen(false);
                     await createNewFile();
+                }}
+            />
+            <DiscardFileDialog
+                open={confirmLoadFileDiscardDialogOpen}
+                onClose={() => setConfirmLoadFileDiscardDialogOpen(false)}
+                onConfirm={async () => {
+                    setConfirmLoadFileDiscardDialogOpen(false);
+                    selectLoadFile();
                 }}
             />
         </>

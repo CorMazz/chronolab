@@ -16,7 +16,7 @@ function useSaveFilePath(setOnly: boolean = false): {
         const fetchGlobalState = async () => {
             try {
                 // Invoke with a null value (if the backend accepts option for that state value) just so that the deserialization works
-                const current_global_state = await invoke<string>("get_app_state", { appStateField: {  saveFilePath: {value: null } }});
+                const current_global_state = await invoke<string>("get_app_state_field", { appStateField: {  saveFilePath: {value: null } }});
                 setLocalSaveFilePath(current_global_state);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -28,7 +28,7 @@ function useSaveFilePath(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalSaveFilePath = async (path: string) => {
-        await invoke("set_app_state", { appStateField: {  saveFilePath: {value: path } }});
+        await invoke("set_app_state_field", { appStateField: {  saveFilePath: {value: path } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -60,7 +60,7 @@ function useCsvFilePath(setOnly: boolean = false): {
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
-                const current_global_state = await invoke<string>("get_app_state", { appStateField: {  csvFilePath: {value: null } }});
+                const current_global_state = await invoke<string>("get_app_state_field", { appStateField: {  csvFilePath: {value: null } }});
                 setLocalCsvFilePath(current_global_state);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -72,7 +72,7 @@ function useCsvFilePath(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalCsvFilePath = async (path: string) => {
-        await invoke("set_app_state", { appStateField: {  csvFilePath: {value: path } }});
+        await invoke("set_app_state_field", { appStateField: {  csvFilePath: {value: path } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -142,7 +142,7 @@ function useLoadCsvSettings(setOnly: boolean = false): {
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
-                const current_global_state = await invoke<LoadCsvSettings>("get_app_state", { appStateField: {  loadCsvSettings: {value: null } }});
+                const current_global_state = await invoke<LoadCsvSettings>("get_app_state_field", { appStateField: {  loadCsvSettings: {value: null } }});
                 setLocalLoadCsvSettings(parseTimeBounds(current_global_state));
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -154,7 +154,7 @@ function useLoadCsvSettings(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalLoadCsvSettings = async (settings: LoadCsvSettings) => {
-        await invoke("set_app_state", { appStateField: {  loadCsvSettings: {value: settings } }});
+        await invoke("set_app_state_field", { appStateField: {  loadCsvSettings: {value: settings } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -187,7 +187,7 @@ function useVideoFilePath(setOnly: boolean = false): {
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
-                const current_global_state = await invoke<string>("get_app_state", { appStateField: { videoFilePath: {value: null } }});
+                const current_global_state = await invoke<string>("get_app_state_field", { appStateField: { videoFilePath: {value: null } }});
                 setLocalVideoFilePath(current_global_state);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -200,7 +200,7 @@ function useVideoFilePath(setOnly: boolean = false): {
     // Update the global state
     const setGlobalVideoFilePath = async (path: string) => {
         // console.log("Original Video File Path Saved to State:", path);
-        await invoke("set_app_state", { appStateField: {  videoFilePath: {value: path } }});
+        await invoke("set_app_state_field", { appStateField: {  videoFilePath: {value: path } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -222,7 +222,7 @@ function useVideoFilePath(setOnly: boolean = false): {
 }
 
 // Enable global state for if the application is multiwindow
-function useIsMultiWindow(setOnly: boolean = false): { 
+function useIsMultiwindow(setOnly: boolean = false): { 
     isMultiwindow: boolean | undefined; 
     setGlobalIsMultiwindow: (isMultiwindow: boolean) => Promise<void>; 
 } {
@@ -234,7 +234,7 @@ function useIsMultiWindow(setOnly: boolean = false): {
         const fetchGlobalState = async () => {
             try {
                 // Here the AppState object in the backend does not accept an option type. Set the placeholder value to false.
-                const current_global_state = await invoke<boolean>("get_app_state", { appStateField: {  isMultiwindow: {value: false } }});
+                const current_global_state = await invoke<boolean>("get_app_state_field", { appStateField: {  isMultiwindow: {value: false } }});
                 setLocalIsMultiwindow(current_global_state);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -247,7 +247,7 @@ function useIsMultiWindow(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalIsMultiwindow = async (isMultiwindow: boolean) => {
-        await invoke("set_app_state",  { appStateField: {  isMultiwindow: {value: isMultiwindow } }});
+        await invoke("set_app_state_field",  { appStateField: {  isMultiwindow: {value: isMultiwindow } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -279,7 +279,7 @@ function useVideoStartTime(setOnly: boolean = false): {
     useEffect(() => {
         const fetchGlobalState = async () => {
             try {
-                const current_global_state = await invoke<string | null>("get_app_state",  { appStateField: {  videoStartTime: {value: null } }});
+                const current_global_state = await invoke<string | null>("get_app_state_field",  { appStateField: {  videoStartTime: {value: null } }});
                 setLocalVideoStartTime(current_global_state ? parseUtcString(current_global_state) : null);
             } catch (e) {
                 console.error("Failed to fetch global state:", e);
@@ -292,7 +292,7 @@ function useVideoStartTime(setOnly: boolean = false): {
 
     // Update the global state
     const setGlobalVideoStartTime = async (videoStartTime: Date | null) => {
-        await invoke("set_app_state", { appStateField: {  videoStartTime: { value: videoStartTime } }});
+        await invoke("set_app_state_field", { appStateField: {  videoStartTime: { value: videoStartTime } }});
     };
 
     // Listen for global state changes if not in setOnly mode
@@ -312,6 +312,52 @@ function useVideoStartTime(setOnly: boolean = false): {
     return { videoStartTime, setGlobalVideoStartTime };
 }
 
+// Enable global state for if the application is multiwindow
+function useIsModifiedSinceLastSave(setOnly: boolean = false): { 
+    isModifiedSinceLastSave: boolean | undefined; 
+    setGlobalIsModifiedSinceLastSave: (isModifiedSinceLastSave: boolean) => Promise<void>; 
+} {
+    const [isModifiedSinceLastSave, setLocalIsModifiedSinceLastSave] = useState<boolean | undefined>(undefined); // Initialize as null
+
+    // Fetch global state on mount
+    useEffect(() => {
+        const fetchGlobalState = async () => {
+            try {
+                // Here the AppState object in the backend does not accept an option type. Set the placeholder value to false.
+                const current_global_state = await invoke<boolean>("get_app_state_field", { appStateField: {  isModifiedSinceLastSave: {value: false } }});
+                setLocalIsModifiedSinceLastSave(current_global_state);
+            } catch (e) {
+                console.error("Failed to fetch global state:", e);
+                setLocalIsModifiedSinceLastSave(false); // Default value on error
+            }
+        };
+
+        fetchGlobalState();
+    }, []);
+
+    // Update the global state
+    const setGlobalIsModifiedSinceLastSave = async (isModifiedSinceLastSave: boolean) => {
+        await invoke("set_app_state_field",  { appStateField: {  isModifiedSinceLastSave: {value: isModifiedSinceLastSave } }});
+    };
+
+    // Listen for global state changes if not in setOnly mode
+    useEffect(() => {
+        if (setOnly) return; // Skip listener setup if only setting state
+
+        const unlisten = listen<boolean>("state-change--is-modified-since-last-save", (event) => {
+            setLocalIsModifiedSinceLastSave(event.payload); 
+        });
+
+        // Cleanup the listener when the component unmounts
+        return () => {
+            unlisten.then((f) => f());
+        };
+    }, [setOnly]);
+
+    return { isModifiedSinceLastSave, setGlobalIsModifiedSinceLastSave };
+}
+
+
 
 // Define the type for the return value of useGlobalState
 type GlobalState = {
@@ -327,6 +373,8 @@ type GlobalState = {
     setIsMultiwindow: ((isMultiwindow: boolean) => Promise<void>) | undefined;
     videoStartTime: (Date | null) | undefined;
     setVideoStartTime: ((startTime: Date | null) => Promise<void>) | undefined;
+    isModifiedSinceLastSave: (boolean | null) | undefined;
+    setIsModifiedSinceLastSave: ((isModifiedSinceLastSave: boolean) => Promise<void>) | undefined;
 };
 
 /**
@@ -339,6 +387,7 @@ function useGlobalState(options: {
     videoFile?: boolean; 
     isMultiwindow?: boolean; 
     videoStartTime?: boolean; 
+    isModified?: boolean;
     setOnly?: boolean 
 } = {
     saveFile: false,
@@ -347,13 +396,15 @@ function useGlobalState(options: {
     videoFile: false,
     isMultiwindow: false,
     videoStartTime: false,
+    isModified: false,
     setOnly: false,
 }): GlobalState {
     const saveFileState = options.saveFile ? useSaveFilePath(options.setOnly) : null;
     const csvState = options.csvFile ? useCsvFilePath(options.setOnly) : null;
     const csvSettingsState = options.loadCsvSettings ? useLoadCsvSettings(options.setOnly) : null;
     const videoState = options.videoFile ? useVideoFilePath(options.setOnly) : null;
-    const multiwindowState = options.isMultiwindow ? useIsMultiWindow(options.setOnly) : null;
+    const multiwindowState = options.isMultiwindow ? useIsMultiwindow(options.setOnly) : null;
+    const isModifiedState = options.isModified ? useIsModifiedSinceLastSave(options.setOnly) : null;
     const videoStartTimeState = options.videoStartTime ? useVideoStartTime(options.setOnly) : null;
 
     return {
@@ -367,6 +418,8 @@ function useGlobalState(options: {
         setVideoFilePath: videoState?.setGlobalVideoFilePath,
         isMultiwindow: multiwindowState?.isMultiwindow,
         setIsMultiwindow: multiwindowState?.setGlobalIsMultiwindow,
+        isModifiedSinceLastSave: isModifiedState?.isModifiedSinceLastSave,
+        setIsModifiedSinceLastSave: isModifiedState?.setGlobalIsModifiedSinceLastSave,
         videoStartTime: videoStartTimeState?.videoStartTime,
         setVideoStartTime: videoStartTimeState?.setGlobalVideoStartTime,
     };
