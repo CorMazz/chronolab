@@ -11,6 +11,44 @@ use std::{
 use strum::{EnumIter, IntoEnumIterator};
 use tauri::{path::SafePathBuf, AppHandle, Emitter, State};
 
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Newtypes
+// #############################################################################################################################################
+// #############################################################################################################################################
+
+/// We are using the NewType pattern to make the compiler enforce that developers store the correct state value in AppState fields that share the same primitive type
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct SaveFilePath(SafePathBuf);
+
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct CsvFilePath(SafePathBuf);
+
+#[derive(From, Into, Clone, Deserialize, Serialize)]
+pub struct VideoFilePath(SafePathBuf);
+
+#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
+pub struct IsMultiwindow(bool);
+
+#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
+pub struct IsModifiedSinceLastSave(bool);
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Newtype Implementations
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+impl AsRef<Path> for SaveFilePath {
+    fn as_ref(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Secondary Structs
+// #############################################################################################################################################
+// #############################################################################################################################################
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[allow(dead_code)]
 pub struct LoadCsvSettings {
@@ -30,42 +68,16 @@ pub struct TimeBounds {
     pub end_time: Option<NaiveDateTime>,
 }
 
-/// Use this for deserializing all datetimes. It handles empty strings, and it automatically truncates the Z at the end of the string that the JSON frontend sends.
-/// We're not dealing with datetimes, so just get rid of the Z (which indicates UTC time).
-fn nullable_naive_datetime<'de, D>(deserializer: D) -> Result<Option<NaiveDateTime>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s: Option<String> = Option::deserialize(deserializer)?;
-    if let Some(ref s) = s {
-        if s.is_empty() {
-            return Ok(None); // Treat empty string as None
-        }
-        NaiveDateTime::parse_from_str(s.trim_end_matches("Z"), "%Y-%m-%dT%H:%M:%S%.3f")
-            .map(Some)
-            .map_err(serde::de::Error::custom)
-    } else {
-        Ok(None) // Treat missing value as None
-    }
-}
 
-/// We are using the NewType pattern to make the compiler enforce that developers store the correct state value in AppState fields that share the same primitive type
-#[derive(From, Into, Clone, Deserialize, Serialize)]
-pub struct SaveFilePath(SafePathBuf);
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Appstate & Impls
+// #############################################################################################################################################
+// #############################################################################################################################################
 
-impl AsRef<Path> for SaveFilePath {
-    fn as_ref(&self) -> &Path {
-        self.0.as_ref()
-    }
-}
-#[derive(From, Into, Clone, Deserialize, Serialize)]
-pub struct CsvFilePath(SafePathBuf);
-#[derive(From, Into, Clone, Deserialize, Serialize)]
-pub struct VideoFilePath(SafePathBuf);
-#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
-pub struct IsMultiwindow(bool);
-#[derive(Default, From, Into, Clone, Deserialize, Serialize)]
-pub struct IsModifiedSinceLastSave(bool);
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// App State
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// When adding fields to this struct, ensure you also add them to the AppStateField enum.
 /// Anywhere that there are two attributes with the same type, create a new type to enforce code correctness at compile time. 
@@ -84,6 +96,10 @@ pub struct AppState {
     pub is_modified_since_last_save: IsModifiedSinceLastSave,
     // Danger: Ensure these are all captured in the AppStateField enum
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// AppStateField Enum
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// Use an enum with named fields so that we can define the appropriate object in JS that can be directly deserialized into an AppStateField enum variant.
 /// Then when we match on the AppStateField, the compiler enforces that we have all of our bases covered.
@@ -116,6 +132,10 @@ pub enum AppStateField {
         value: IsModifiedSinceLastSave,
     },
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// App State Implementations
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 impl AppState {
     fn set_field(&mut self, field: AppStateField) {
@@ -182,10 +202,20 @@ impl AppState {
     }
 }
 
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Tauri Commands
+// #############################################################################################################################################
+// #############################################################################################################################################
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Set App State Field
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
 /// This function sets the global app state when invoked from tauri
 /// app_state_field is a serialized variant of the AppStateField enum.
 #[tauri::command]
-pub async fn set_app_state<'a>(
+pub async fn set_app_state_field<'a>(
     app: AppHandle,
     state: State<'a, Mutex<AppState>>,
     app_state_field: Value,
@@ -223,20 +253,13 @@ pub async fn set_app_state<'a>(
     Ok(())
 }
 
-/// Utility function for the set_app_state and load_app_state_from_file commands
-fn emit_app_state_update<T: Serialize + Clone>(
-    app: &AppHandle,
-    field_name: String,
-    event_payload: T,
-) -> Result<(), String> {
-    app.emit(&format!("state-change--{}", field_name), event_payload)
-        .map_err(|err| format!("Function set_app_state in global_state.rs -- failed to emit state update event for {}: {}", field_name, err))?;
-    Ok(())
-}
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Get App State Field
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
-/// This function retrieves the global app state when invoked from Tauri
+/// This function retrieves a specific global app state field when invoked from Tauri
 #[tauri::command]
-pub async fn get_app_state<'a>(
+pub async fn get_app_state_field<'a>(
     state: State<'a, Mutex<AppState>>,
     app_state_field: Value,
 ) -> Result<Value, String> {
@@ -271,16 +294,9 @@ pub async fn get_app_state<'a>(
     }
 }
 
-/// Utility function for get_app_state
-fn to_json<T: Serialize>(payload: T, field_name: String) -> Result<Value, String> {
-    let value_json = serde_json::to_value(payload).map_err(|err| {
-        format!(
-            "Function get_app_state in global_state.rs -- failed to serialize {}: {}",
-            field_name, err
-        )
-    })?;
-    Ok(value_json)
-}
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Clear App State
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// Clear the current settings and create a new one.
 #[tauri::command]
@@ -299,6 +315,10 @@ pub async fn clear_app_state<'a>(app: AppHandle, state: State<'a, Mutex<AppState
     Ok(())
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Save App State To File
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
 /// If you want to save to a different file, update the file name in the global state first from a frontend set_app_state invocation.
 #[tauri::command]
 pub async fn save_app_state_to_file<'a>(state: State<'a, Mutex<AppState>>) -> Result<(), String> {
@@ -312,6 +332,10 @@ pub async fn save_app_state_to_file<'a>(state: State<'a, Mutex<AppState>>) -> Re
     app_state.save_to_file()?;
     Ok(())
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Load App State From File
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// Loads the app state and then emits to the front-end all the different events that happen.
 #[tauri::command]
@@ -336,6 +360,55 @@ pub async fn load_app_state_from_file<'a>(
 
     Ok(())
 }
+
+
+// #############################################################################################################################################
+// #############################################################################################################################################
+// Utility Functions
+// #############################################################################################################################################
+// #############################################################################################################################################
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Emit App State Update
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+/// Utility function for the set_app_state and load_app_state_from_file commands
+fn emit_app_state_update<T: Serialize + Clone>(
+    app: &AppHandle,
+    field_name: String,
+    event_payload: T,
+) -> Result<(), String> {
+    app.emit(&format!("state-change--{}", field_name), event_payload)
+        .map_err(|err| format!("Function set_app_state in global_state.rs -- failed to emit state update event for {}: {}", field_name, err))?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Nullable Naive Datetime Parser
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+/// Use this for deserializing all datetimes. It handles empty strings, and it automatically truncates the Z at the end of the string that the JSON frontend sends.
+/// We're not dealing with datetimes, so just get rid of the Z (which indicates UTC time).
+fn nullable_naive_datetime<'de, D>(deserializer: D) -> Result<Option<NaiveDateTime>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: Option<String> = Option::deserialize(deserializer)?;
+    if let Some(ref s) = s {
+        if s.is_empty() {
+            return Ok(None); // Treat empty string as None
+        }
+        NaiveDateTime::parse_from_str(s.trim_end_matches("Z"), "%Y-%m-%dT%H:%M:%S%.3f")
+            .map(Some)
+            .map_err(serde::de::Error::custom)
+    } else {
+        Ok(None) // Treat missing value as None
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Broadcast Complete Global State Change
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// Utility function to broadcast that the whole global state changed and the frontend needs to be refreshed. 
 fn broadcast_complete_global_state_change(app: &AppHandle, app_state: MutexGuard<'_, AppState>) -> Result<(), String> {
@@ -373,3 +446,26 @@ fn broadcast_complete_global_state_change(app: &AppHandle, app_state: MutexGuard
 
     Ok(())
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// To JSON
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+/// Utility function for get_app_state
+fn to_json<T: Serialize>(payload: T, field_name: String) -> Result<Value, String> {
+    let value_json = serde_json::to_value(payload).map_err(|err| {
+        format!(
+            "Function get_app_state in global_state.rs -- failed to serialize {}: {}",
+            field_name, err
+        )
+    })?;
+    Ok(value_json)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Broadcast Complete Global State Change
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Broadcast Complete Global State Change
+// ---------------------------------------------------------------------------------------------------------------------------------------------

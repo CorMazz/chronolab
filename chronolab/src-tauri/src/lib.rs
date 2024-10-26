@@ -4,8 +4,8 @@ mod video_handlers;
 
 use dataframe_handlers::{get_csv_data, get_csv_schema};
 use global_state::{
-    clear_app_state, get_app_state, load_app_state_from_file, save_app_state_to_file,
-    set_app_state, AppState,
+    clear_app_state, get_app_state_field, load_app_state_from_file, save_app_state_to_file,
+    set_app_state_field, AppState,
 };
 use std::sync::Mutex;
 use tauri::Manager;
@@ -25,8 +25,8 @@ pub fn run() {
             get_csv_schema,
             get_csv_data,
             emit_video_time_change,
-            set_app_state,
-            get_app_state,
+            set_app_state_field,
+            get_app_state_field,
             save_app_state_to_file,
             load_app_state_from_file,
             clear_app_state,
