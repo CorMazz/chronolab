@@ -9,10 +9,8 @@ import {
 import {
     ViewColumn as SideBySideIcon,
     ViewStream as StackedIcon,
-    ChevronLeft as LeftIcon,
-    ChevronRight as RightIcon,
-    KeyboardArrowUp as UpIcon,
-    KeyboardArrowDown as DownIcon,
+    SyncAlt as LeftRightIcon,
+    UnfoldMore as UpDownIcon,
 } from '@mui/icons-material';
 
 type LayoutType = 'side-by-side-plot-left' | 'side-by-side-video-left' | 'stacked-video-top' | 'stacked-plot-top';
@@ -76,28 +74,28 @@ function ViewMenu({ currentLayout, onLayoutChange }: ViewMenuProps) {
                     onClick={() => handleLayoutSelect('side-by-side-plot-left')}
                     selected={currentLayout === 'side-by-side-plot-left'}
                 >
-                    <ListItemIcon><SideBySideIcon fontSize="small" /><LeftIcon fontSize="small" /></ListItemIcon>
+                    <ListItemIcon><SideBySideIcon fontSize="small" /><LeftRightIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Plot Left</ListItemText>
                 </MenuItem>
                 <MenuItem 
                     onClick={() => handleLayoutSelect('side-by-side-video-left')}
                     selected={currentLayout === 'side-by-side-video-left'}
                 >
-                    <ListItemIcon><SideBySideIcon fontSize="small" /><RightIcon fontSize="small" /></ListItemIcon>
+                    <ListItemIcon><SideBySideIcon fontSize="small" /><LeftRightIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Video Left</ListItemText>
                 </MenuItem>
                 <MenuItem 
                     onClick={() => handleLayoutSelect('stacked-video-top')}
                     selected={currentLayout === 'stacked-video-top'}
                 >
-                    <ListItemIcon><StackedIcon fontSize="small" /><UpIcon fontSize="small" /></ListItemIcon>
+                    <ListItemIcon><StackedIcon fontSize="small" /><UpDownIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Video Top</ListItemText>
                 </MenuItem>
                 <MenuItem 
                     onClick={() => handleLayoutSelect('stacked-plot-top')}
                     selected={currentLayout === 'stacked-plot-top'}
                 >
-                    <ListItemIcon><StackedIcon fontSize="small" /><DownIcon fontSize="small" /></ListItemIcon>
+                    <ListItemIcon><StackedIcon fontSize="small" /><UpDownIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Plot Top</ListItemText>
                 </MenuItem>
             </Menu>

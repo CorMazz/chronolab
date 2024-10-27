@@ -241,9 +241,13 @@ function PlotSettings() {
             }}>
                 {/* Conditional rendering based on column availability */}
                 {!csvFilePath ? (                        
-                        <OptionalButton toggleable={false} onClick={() => selectCsvFile(setCsvFilePath)}>
+                        <Button 
+                            variant="contained" 
+                            color="primary" 
+                            onClick={() => selectCsvFile(setCsvFilePath)}
+                        >
                             Select CSV File
-                        </OptionalButton>
+                        </Button>
                     ) : (
                             (columns === undefined || columns.length === 0) ? (
                                 <Typography variant="body1" color="textSecondary" align="center">

@@ -44,15 +44,15 @@ function App() {
           case 'side-by-side-plot-left':
               return {
                   lg: [
-                      { i: 'plot', x: 0, y: 0, w: 6, h: 12, minW: 3, maxW: 9 },
-                      { i: 'video', x: 6, y: 0, w: 6, h: 12, minW: 3, maxW: 9 }
+                      { i: 'plot', x: 0, y: 0, w: 6, h: 9, minW: 3, maxW: 9 },
+                      { i: 'video', x: 6, y: 0, w: 6, h: 9, minW: 3, maxW: 9 }
                   ]
               };
           case 'side-by-side-video-left':
               return {
                   lg: [
-                      { i: 'video', x: 0, y: 0, w: 6, h: 12, minW: 3, maxW: 9 },
-                      { i: 'plot', x: 6, y: 0, w: 6, h: 12, minW: 3, maxW: 9 }
+                      { i: 'video', x: 0, y: 0, w: 6, h: 9, minW: 3, maxW: 9 },
+                      { i: 'plot', x: 6, y: 0, w: 6, h: 9, minW: 3, maxW: 9 }
                   ]
               };
           case 'stacked-video-top':
@@ -104,10 +104,8 @@ function App() {
                       sx={{
                           border: '1px solid #ccc',
                           borderRadius: 2,
-                          backgroundColor: 'background.paper',
-                          p: 2,
                           height: '100%',
-                          overflow: 'hidden',
+                          overflow: 'auto',
                           display: 'flex',
                           flexDirection: 'column'
                       }}
@@ -120,10 +118,8 @@ function App() {
                       sx={{
                           border: '1px solid #ccc',
                           borderRadius: 2,
-                          backgroundColor: 'background.paper',
-                          p: 2,
-                          height: '100%',
-                          overflow: 'hidden',
+                          height: '90%',
+                          overflow: 'auto',
                           display: 'flex',
                           flexDirection: 'column'
                       }}
