@@ -11,6 +11,7 @@ import {
   MediaSeekBackwardButton,
   MediaSeekForwardButton,
   MediaMuteButton,
+  MediaFullscreenButton,
 } from 'media-chrome/react';
 import { Container, Button, Box, Typography, TextField } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
@@ -146,10 +147,7 @@ function VideoPlayer() {
                   sx={{
                     width: '100%',
                     height: "fit-content",
-                    borderRadius: 2, // 8px rounded corners
-                    overflow: 'hidden', // Clips the video content to match the border radius
-                    border: '2px solid', // Optional border
-                    borderColor: 'primary.main', // Border color using theme's primary color
+                    clipPath: 'inset(0 round 16px)',
                     boxShadow: 3, // Box shadow for elevation effect
                 }}>
                     <MediaController>
@@ -160,7 +158,7 @@ function VideoPlayer() {
                             preload="auto"
                             muted
                             crossOrigin=""
-                            style={{ width: '100%', borderRadius: 8 }}
+                            style={{ width: '100%' }}
                         />
                         <MediaControlBar>
                             <MediaPlayButton></MediaPlayButton>
@@ -170,6 +168,7 @@ function VideoPlayer() {
                             <MediaTimeDisplay showDuration></MediaTimeDisplay>
                             <MediaMuteButton></MediaMuteButton>
                             <MediaVolumeRange></MediaVolumeRange>
+                            <MediaFullscreenButton></MediaFullscreenButton>
                         </MediaControlBar>
                     </MediaController>
                 </Box>

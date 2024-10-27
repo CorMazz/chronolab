@@ -5,7 +5,6 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
-    IconButton,
 } from '@mui/material';
 import {
     ViewColumn as SideBySideIcon,
@@ -105,7 +104,7 @@ function ViewMenu({ currentLayout, onLayoutChange }: ViewMenuProps) {
                     <ListItemText>Plot Top</ListItemText>
                 </MenuItem>
                 <MenuItem
-                    onClick={toggleTheme} color="inherit"
+                    onClick={() => {toggleTheme(); handleMenuClose();}} color="inherit"
                 >
                     <ListItemIcon>{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}</ListItemIcon>
                     <ListItemText>Toggle {mode === 'dark' ? 'Light' : 'Dark'} Mode</ListItemText>

@@ -1,25 +1,24 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
-// Light theme configuration
 const lightTheme: ThemeOptions = {
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+    palette: {
+      mode: 'light',
+      primary: {
+        main: '#5e35b1',      // Deep purple
+        light: '#7e57c2',     // Lighter purple for hover states
+        dark: '#4527a0',      // Darker purple for active states
+      },
+      secondary: {
+        main: '#00897b',      // Teal as a complementary color
+        light: '#4ebaaa',
+        dark: '#005b4f',
+      },
+      background: {
+        default: '#ffffff',
+        paper: '#f5f5f5',
+      },
     },
-    secondary: {
-      main: '#9c27b0',
-      light: '#ba68c8',
-      dark: '#7b1fa2',
-    },
-    background: {
-      default: '#ffffff',
-      paper: '#f5f5f5',
-    },
-  },
-};
+  };
 
 // Dark theme configuration
 const darkTheme: ThemeOptions = {

@@ -84,10 +84,5 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 ## Last Thing I Was Working On
 
 Reimplement the second window functionality.
-Add ability to dynamically resize plot and video. Also move the plot and video.
-Add video fullscreen option.
-Add toggle setting to choose whether plot should follow the video.
-Add dark mode.
-Add time range slider to choose how much time the plot should show when following the video.
 Then keep working on plot functionality.
 After that comes video IOI tagging.
