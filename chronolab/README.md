@@ -32,7 +32,7 @@ The newtype pattern prevents the type of issue we can see in the code sample her
 
 `AppStateField::IsModifiedSinceLastSave { value: bool } => self.is_multiwindow: bool = value`
 
-Here, we as the developer accidentally assign `IsModifiedSinceLastSave` to the `self.is_multiwindow` field of the struct, and the compiler lets us since they are both booleans. Adding newtypes for duplicate primitive types in our AppState struct prevents this.
+Here, we as the developer accidentally assign `IsModifiedSinceLastSave` to the `self.is_multiwindow` field of the AppState struct, and the compiler lets us since they are both booleans. Adding newtypes for duplicate primitive types in our AppState struct prevents this.
 
 ### TimeZones
 
@@ -58,6 +58,9 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 6. **Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).**
 7. **Automatic video start time parsing**
    1. Search for anything resembling a datetime string in the video file name and use that as the video start time.
+8. **Make Video React to Plot**
+   1. If you click on a specific point at the plot, have the video scroll to that point.
+9. **Add Frame by Frame Video Seeking**
 
 ## TODO
 
@@ -75,10 +78,16 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 ## Bugs
 
 1. Unselecting a column in the PlotSettings after the plot has loaded those settings breaks stuff.
+2. Selecting a new CSV file does not unload the old CSV file if one was already selected.
 
 ## Last Thing I Was Working On
 
+Implement a toast queue.
+Reimplement the second window functionality.
+Add ability to dynamically resize plot and video. Also move the plot and video.
+Add video fullscreen option.
 Add toggle setting to choose whether plot should follow the video.
-Add time range slider for video/plot data following.
+Add dark mode.
+Add time range slider to choose how much time the plot should show when following the video.
 Then keep working on plot functionality.
 After that comes video IOI tagging.

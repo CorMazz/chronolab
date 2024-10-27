@@ -94,8 +94,8 @@ export function FileMenu() {
             handleSaveAs()
         } else {
             try {
-                await invoke("save_app_state_to_file");
                 handleMenuClose();
+                await invoke("save_app_state_to_file");
                 showToast("Saved", "success");
             } catch (error) {
                 console.error('Error during save:', error);
@@ -106,10 +106,10 @@ export function FileMenu() {
 
     const handleSaveAs = async () => {
         try {
+            handleMenuClose();
             selectSaveFile(setSaveFilePath);
             await waitForGlobalStateUpdate("state-change--save-file-path");
             await invoke("save_app_state_to_file");
-            handleMenuClose();
             showToast("Saved", "success");
         } catch (error) {
             console.error('Error during save process:', error);
