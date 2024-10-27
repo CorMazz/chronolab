@@ -82,7 +82,6 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 ## Last Thing I Was Working On
 
-Implement a toast queue.
 Reimplement the second window functionality.
 Add ability to dynamically resize plot and video. Also move the plot and video.
 Add video fullscreen option.
