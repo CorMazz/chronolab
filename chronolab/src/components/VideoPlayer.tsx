@@ -138,10 +138,7 @@ function VideoPlayer() {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
-                mt: 4, 
-                p: 2, 
-                border: '1px solid #ccc', 
-                borderRadius: 2 
+                mt: 4
             }}
         >
             {videoFilePath ? (
