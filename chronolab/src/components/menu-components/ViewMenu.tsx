@@ -5,13 +5,17 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
+    IconButton,
 } from '@mui/material';
 import {
     ViewColumn as SideBySideIcon,
     ViewStream as StackedIcon,
     SyncAlt as LeftRightIcon,
     UnfoldMore as UpDownIcon,
+    Brightness7 as Brightness7Icon,
+    Brightness4 as Brightness4Icon,
 } from '@mui/icons-material';
+import { useTheme } from '../../themes/ThemeContext';
 
 type LayoutType = 'side-by-side-plot-left' | 'side-by-side-video-left' | 'stacked-video-top' | 'stacked-plot-top';
 
@@ -22,7 +26,9 @@ interface ViewMenuProps {
 
 function ViewMenu({ currentLayout, onLayoutChange }: ViewMenuProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const { mode, toggleTheme } = useTheme();
     const menuOpen = Boolean(anchorEl);
+    
 
     const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -97,6 +103,12 @@ function ViewMenu({ currentLayout, onLayoutChange }: ViewMenuProps) {
                 >
                     <ListItemIcon><StackedIcon fontSize="small" /><UpDownIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Plot Top</ListItemText>
+                </MenuItem>
+                <MenuItem
+                    onClick={toggleTheme} color="inherit"
+                >
+                    <ListItemIcon>{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}</ListItemIcon>
+                    <ListItemText>Toggle {mode === 'dark' ? 'Light' : 'Dark'} Mode</ListItemText>
                 </MenuItem>
             </Menu>
         </>

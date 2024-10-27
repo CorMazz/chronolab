@@ -94,10 +94,11 @@ function App() {
                   rowHeight={rowHeight}
                   width={window.innerWidth - 40} // Subtract padding
                   margin={[20, 20]}
-                  isDraggable={false}
+                  isDraggable={true}
                   isResizable={true}
                   useCSSTransforms={true}
-                  onResize={() => window.dispatchEvent(new Event('resize'))} // Trigger resize for child components
+                  onResize={() => window.dispatchEvent(new Event('resize'))}
+                  draggableHandle='.drag-handle'
               >
                   <Box
                       key="video"
@@ -110,6 +111,18 @@ function App() {
                           flexDirection: 'column'
                       }}
                   >
+                        <Box 
+                            className="drag-handle"
+                            sx={{
+                                height: '24px',
+                                backgroundColor: '#f5f5f5',
+                                borderBottom: '1px solid #ccc',
+                                cursor: 'move',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '0 8px'
+                            }}
+                        ></Box>
                       <VideoPlayer />
                   </Box>
                   
@@ -124,6 +137,18 @@ function App() {
                           flexDirection: 'column'
                       }}
                   >
+                        <Box 
+                            className="drag-handle"
+                            sx={{
+                                height: '24px',
+                                backgroundColor: '#f5f5f5',
+                                borderBottom: '1px solid #ccc',
+                                cursor: 'move',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '0 8px'
+                            }}
+                        ></Box>
                       {!isMultiwindow && (loadCsvSettings ? <Plotter /> : <PlotSettings />)}
                   </Box>
               </ResponsiveGridLayout>

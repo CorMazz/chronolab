@@ -6,7 +6,6 @@ import { LoadCsvSettings } from "../types/appState";
 import {z} from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText, MenuItem, TextField, Typography } from "@mui/material";
-import OptionalButton from "./custom-ui-components/OptionalButton";
 import { parseUtcString, dateToUtcString } from "../utils/datetimeHandlers";
 import { useFileOperations } from "../hooks/useFileOperations";
 

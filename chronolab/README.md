@@ -79,6 +79,7 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 
 1. Unselecting a column in the PlotSettings after the plot has loaded those settings breaks stuff.
 2. Selecting a new CSV file does not unload the old CSV file if one was already selected.
+3. <https://github.com/react-grid-layout/react-grid-layout/pull/2043>
 
 ## Last Thing I Was Working On
 
