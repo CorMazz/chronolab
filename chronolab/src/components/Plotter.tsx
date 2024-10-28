@@ -69,7 +69,7 @@ function Plotter() {
             return;
           }
 
-          const currentTime = addSeconds(videoStartTime, event.payload);
+          const currentTime = addSeconds(toZonedTime(videoStartTime, "UTC"), event.payload);
           const windowStart = addSeconds(currentTime, -timeBeforeVideo);
           const windowEnd = addSeconds(currentTime, timeAfterVideo);
 
@@ -111,7 +111,7 @@ function Plotter() {
             ts => toZonedTime(toDate(Number(ts)), "UTC")
           );
 
-          const series = parsedData.schema.fields.slice(1).map((field, index) => {
+          const series = parsedData.schema.fields.slice(1).map((field, _) => {
             const values = parsedData.getChild(field.name)?.toArray() ?? [];
             return {
               name: field.name,
