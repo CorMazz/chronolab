@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { tableFromIPC } from "apache-arrow";
 import { toDate } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+
 import { alpha, Box, FormControlLabel, Stack, Switch, TextField, useTheme } from '@mui/material';
 import useGlobalState from '../hooks/useGlobalState';
 import { listen } from '@tauri-apps/api/event';
