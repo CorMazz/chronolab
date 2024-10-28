@@ -69,7 +69,7 @@ pub async fn get_csv_schema(state: State<'_, Mutex<AppState>>) -> Result<Vec<Sch
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
 /// Loads the DataFrame per the load_csv_settings in the AppStateSerializes the Polars DataFrame to Apache Arrow format and then sends that binary response in a Tauri array buffer via IPC
-/// In theory that is faster than using JSON.
+/// In theory that is faster than using JSON. The datetime column will always be the first column. 
 #[tauri::command]
 pub async fn get_csv_data(state: State<'_, Mutex<AppState>>) -> Result<Response, String> {
     let state = state.lock().map_err(|e| {
