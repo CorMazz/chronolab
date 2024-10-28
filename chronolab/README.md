@@ -90,7 +90,8 @@ I originally wanted to use Ploty, but I ran into [a bug](https://community.plotl
 2. Selecting a new CSV file does not unload the old CSV file if one was already selected.
 3. <https://github.com/react-grid-layout/react-grid-layout/pull/2043>
 4. After adding Apache Echarts I can no longer resize the individual plot and video windows.
-   1. The Apache EChart will not resize if the application window is resized
+   1. The Apache EChart will not resize if the application window is resized by clicking the expand button, but if it's dragged it works
+
 
 ## Last Thing I Was Working On
 

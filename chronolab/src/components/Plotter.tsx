@@ -4,7 +4,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { tableFromIPC } from "apache-arrow";
 import { toDate } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { Box, FormControlLabel, Stack, Switch, TextField, useTheme } from '@mui/material';
+
+import { alpha, Box, FormControlLabel, Stack, Switch, TextField, useTheme } from '@mui/material';
 import useGlobalState from '../hooks/useGlobalState';
 import { listen } from '@tauri-apps/api/event';
 
@@ -151,6 +152,22 @@ function Plotter() {
             },
             toolbox: {
               feature: {
+                dataZoom: {
+                  show: true,
+                  title: {
+                    zoom: 'Area Zoom',
+                    back: 'Undo Zoom'
+                  },
+                  iconStyle: {
+                    borderColor: theme.palette.text.primary
+                  },
+                  brushStyle: {
+                    borderWidth: 1,
+                    borderColor: theme.palette.primary.main,
+                    color: alpha(theme.palette.primary.main, 0.1), // Creates a semi-transparent fill
+                    borderRadius: 0
+                  }
+                },
                 restore: {
                   show: true,
                   title: 'Reset Zoom'
@@ -173,11 +190,13 @@ function Plotter() {
             },
             series: series,
             grid: {
-              left: '50px',
-              right: '50px',
-              top: '40px',
+              responsive: true,
+              left: '10%',
+              right: '10%',
+              top: '60px',
               bottom: '80px',
-              containLabel: true
+              containLabel: true,
+              show: true
             },
             dataZoom: [{
               id: "dataZoomX",

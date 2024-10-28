@@ -94,8 +94,8 @@ function App() {
                   rowHeight={rowHeight}
                   width={window.innerWidth - 40} // Subtract padding
                   margin={[20, 20]}
-                  isDraggable={true}
-                  isResizable={true}
+                  isDraggable={false}  // Temporarily disable these for MVP until I fix the bugs
+                  isResizable={false} 
                   useCSSTransforms={true}
                   onResize={() => window.dispatchEvent(new Event('resize'))}
                   draggableHandle='.drag-handle'
