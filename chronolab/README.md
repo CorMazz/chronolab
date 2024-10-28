@@ -42,47 +42,58 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice. I also tried Fluent UI, which I honestly liked the aesthetic better, but was fighting bugs for way too long and decided to pivot back to Material UI.
 
-## Potential Features
+### Plotting Library
+
+I originally wanted to use Ploty, but I ran into [a bug](https://community.plotly.com/t/webgl-is-not-supported-by-your-browser-for-scatter3d-on-safari-13-3-1-and-chrome-83-0-4103-106/41469) that stymied all of my forward progress. I pivoted to [Apache ECharts](https://dev.to/manufac/using-apache-echarts-with-react-and-typescript-353k) because it can handle large datasets and has better interactivity than Plotly. In Apache Echarts, downsampling is already included, so I won't have to include that myself. The x-axis range slider also works, and I was able to implement the functionality there that I wanted. Pivoting to Apache ECharts was an excellent decision and saved me a lot of pain from Plotly.
+
+## Features
+
+### Implemented Features
 
 1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
-2. **IOI Noting**
+2. **Dynamic Video Data Downsampling**
+   1. This is included out-of-the-box with Apache ECharts with the sampling parameter. Keep an eye out for a [better sampling algorithm](https://github.com/apache/echarts/issues/20422) that they may implement.
+3. **Add a Dynamic Rangeslider on the Plot to See All Available Data**
+   1. Again, this is included out-of-the-box with Apache ECharts dataZooms.
+
+### Potential Features
+
+1. **IOI Noting**
    1. Have a dialog on the right side that allows the user to note items of interest and add a name/description of the event
    2. Allow the user to rapidly seek to that time in the event
    3. <https://hacks.mozilla.org/2014/08/building-interactive-html5-videos/>
-3. **Video Section Labeling**
+2. **Video Section Labeling**
    1. Like how on YouTube you can hover over the video time bar and it will tell you what different sections there are
-4. **Rust backend video editing**
+3. **Rust backend video editing**
    1. Load in separate video files and determine how to combine them and position them based on user GUI input
    2. Save the combined videos + data as a single video
-5. **Add tsdownsample to downsample large traces and allow for quicker data visualization.**
-6. **Add a callback to update the y-axis range when there is a rangeslider the same way that [this guy did it](https://github.com/plotly/plotly.js/issues/1876#issuecomment-1232030346).**
-7. **Automatic video start time parsing**
+4. **Automatic video start time parsing**
    1. Search for anything resembling a datetime string in the video file name and use that as the video start time.
-8. **Make Video React to Plot**
+5. **Make Video React to Plot**
    1. If you click on a specific point at the plot, have the video scroll to that point.
-9. **Add Frame by Frame Video Seeking**
+6. **Add Frame by Frame Video Seeking**
 
 ## TODO
 
 1. Add the -performance feature to Polars to make it faster (at the expense of compile time)
-2. [Determine how to make Plotly faster](https://www.somesolvedproblems.com/2018/07/how-do-i-make-plotly-faster.html) before trying to implement downsampling
-3. Deal with smoothing the Plotly relayout. Right now it is still choppy/buggy. Look into [easing functions](https://plotly.com/python/reference/layout/#layout-transition-easing)
-4. Set isMultiwindow to false when the second window closes.
-5. Determine if I need to switch the state to RwLock instead of Mutex
-6. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
-7. Allow users to drag the plot window and the video window to different places.
-8. Make the PlotSettings tell the user to select a CSV file if they haven't already, instead of just showing a blank screen.
-9. When going to release, get all the CSP working.
-10. Remove the allow inline-scripts CSP.
+2. Set isMultiwindow to false when the second window closes.
+3. Determine if I need to switch the state to RwLock instead of Mutex
+4. Attempt to cast all columns to numeric if they are not already. Flash to the user that certain columns were unable to be coerced to a numeric datatype. <https://docs.pola.rs/user-guide/expressions/casting/#strings>
+5. Allow users to drag the plot window and the video window to different places.
+6. Make the PlotSettings tell the user to select a CSV file if they haven't already, instead of just showing a blank screen.
+7. When going to release, get all the CSP working.
+8. Remove the allow inline-scripts CSP.
 
 ## Bugs
 
 1. Unselecting a column in the PlotSettings after the plot has loaded those settings breaks stuff.
 2. Selecting a new CSV file does not unload the old CSV file if one was already selected.
 3. <https://github.com/react-grid-layout/react-grid-layout/pull/2043>
+4. After adding Apache Echarts I can no longer resize the individual plot and video windows.
+   1. The Apache EChart will not resize if the application window is resized
 
 ## Last Thing I Was Working On
 
+Create a successful production build with all the functionality currently implemented.
 Reimplement the second window functionality.
-Then keep working on plot functionality.
 After that comes video IOI tagging.
