@@ -1,21 +1,18 @@
-import { useEffect, useState } from 'react';
-import Plot from 'react-plotly.js';
+import { useEffect, useRef, useState } from 'react';
+import * as echarts from 'echarts';
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from '@tauri-apps/api/event';
-import { Table, tableFromIPC } from "apache-arrow";
-import useGlobalState from '../hooks/useGlobalState';
-import { Data } from 'plotly.js';
+import { tableFromIPC } from "apache-arrow";
 import { toDate } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { Box, FormControlLabel, Stack, Switch, TextField, useTheme } from '@mui/material';
+import useGlobalState from '../hooks/useGlobalState';
+import { listen } from '@tauri-apps/api/event';
 
 function Plotter() {
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-  
   const { loadCsvSettings, videoStartTime } = useGlobalState({ loadCsvSettings: true, videoStartTime: true });
-  const [csvTable, setCsvTable] = useState<Table | null>(null);
-  const [plotData, setPlotData] = useState<Data[] | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
   const [followVideo, setFollowVideo] = useState(true);
   const [timeBeforeVideo, setTimeBeforeVideo] = useState(10);
   const [timeAfterVideo, setTimeAfterVideo] = useState(10);
@@ -33,70 +30,61 @@ function Plotter() {
       }
     }
   };
-  
-  const [layout, setLayout] = useState({
-    autosize: true,
-    plot_bgcolor: isDarkMode ? '#1e1e1e' : '#fff',
-    paper_bgcolor: isDarkMode ? '#121212' : '#fff',
-    font: {
-      color: isDarkMode ? '#fff' : '#000',
-    },
-    xaxis: {
-      autorange: true,
-      gridcolor: isDarkMode ? '#333' : '#eee',
-      zerolinecolor: isDarkMode ? '#444' : '#ddd',
-      linecolor: isDarkMode ? '#444' : '#ddd',
-    },
-    yaxis: {
-      gridcolor: isDarkMode ? '#333' : '#eee',
-      zerolinecolor: isDarkMode ? '#444' : '#ddd',
-      linecolor: isDarkMode ? '#444' : '#ddd',
-    },
-    margin: {
-      l: 50,
-      r: 50,
-      b: 50,
-      t: 50,
-      pad: 4
-    },
-  });
 
-  async function setAxesRange(start: Date, end: Date) {
-    setLayout((prevLayout) => ({
-      ...prevLayout,
-      xaxis: {
-        ...prevLayout.xaxis,
-        autorange: false,
-        range: [toZonedTime(start, "UTC"), toZonedTime(end, "UTC")],
-      },
-      transition: {
-        duration: 10,
-        easing: 'cubic-in-out',
-        ordering: "traces first"
-      },
-    }));
-  }
+  // Initialize ECharts
+  useEffect(() => {
+    if (chartRef.current && !chartInstance.current) {
+      chartInstance.current = echarts.init(chartRef.current);
+      
+      // // Add zoom end event listener to disable follow video when user zooms
+      // chartInstance.current.on('datazoom', () => {
+      //   setFollowVideo(false);
+      // });
+    }
 
+    return () => {
+      chartInstance.current?.dispose();
+      chartInstance.current = null;
+    };
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      chartInstance.current?.resize();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Video time sync effect
   useEffect(() => {
     let cleanup: (() => void) | undefined;
 
     async function setupListener() {
       try {
         const unlisten = await listen<number>('video-time-change', (event) => {
-          if (!videoStartTime || !followVideo) {
+          if (!videoStartTime || !followVideo || !chartInstance.current) {
             return;
           }
-          setAxesRange(
-            addSeconds(videoStartTime, -timeBeforeVideo + event.payload),
-            addSeconds(videoStartTime, timeAfterVideo + event.payload)
-          );
+
+          const currentTime = addSeconds(videoStartTime, event.payload);
+          const windowStart = addSeconds(currentTime, -timeBeforeVideo);
+          const windowEnd = addSeconds(currentTime, timeAfterVideo);
+
+          chartInstance.current.dispatchAction({
+            type: "dataZoom",
+            startValue: windowStart.getTime(),
+            endValue: windowEnd.getTime(),
+          });
         });
         
         cleanup = () => {
           unlisten();
         };
       } catch (error) {
-        console.error("Error setting up listener:", error);
+        console.error("Error setting up video time listener:", error);
       }
     }
 
@@ -111,71 +99,116 @@ function Plotter() {
     };
   }, [videoStartTime, followVideo, timeBeforeVideo, timeAfterVideo]);
 
-  // Update layout when theme changes
-  useEffect(() => {
-    setLayout(prevLayout => ({
-      ...prevLayout,
-      plot_bgcolor: isDarkMode ? '#1e1e1e' : '#fff',
-      paper_bgcolor: isDarkMode ? '#121212' : '#fff',
-      font: {
-        color: isDarkMode ? '#fff' : '#000',
-      },
-      xaxis: {
-        ...prevLayout.xaxis,
-        gridcolor: isDarkMode ? '#333' : '#eee',
-        zerolinecolor: isDarkMode ? '#444' : '#ddd',
-        linecolor: isDarkMode ? '#444' : '#ddd',
-      },
-      yaxis: {
-        ...prevLayout.yaxis,
-        gridcolor: isDarkMode ? '#333' : '#eee',
-        zerolinecolor: isDarkMode ? '#444' : '#ddd',
-        linecolor: isDarkMode ? '#444' : '#ddd',
-      },
-    }));
-  }, [isDarkMode]);
-
+  // Load and plot data
   useEffect(() => {
     async function fetchData() {
       try {
         if (loadCsvSettings) {
           const parsedData = tableFromIPC(await invoke('get_csv_data'));
-          setCsvTable(parsedData);
-
-          const x = Array.from(parsedData.getChild(loadCsvSettings?.datetime_index_col)?.toArray() ?? [], ts => toZonedTime(toDate(Number(ts)), "UTC"));
           
-          // Create traces with colors that work well in both light and dark modes
-          const colors = [
-            '#2196f3', // blue
-            '#4caf50', // green
-            '#f44336', // red
-            '#ff9800', // orange
-            '#9c27b0', // purple
-            '#00bcd4', // cyan
-            '#ffeb3b', // yellow
-            '#795548', // brown
-          ];
+          const timestamps = Array.from(
+            parsedData.getChild(loadCsvSettings?.datetime_index_col)?.toArray() ?? [], 
+            ts => toZonedTime(toDate(Number(ts)), "UTC")
+          );
 
-          const newPlotData = parsedData.schema.fields.slice(1).map((field, index) => {
-            const y = parsedData.getChild(field.name)?.toArray() ?? [];
+          const series = parsedData.schema.fields.slice(1).map((field, index) => {
+            const values = parsedData.getChild(field.name)?.toArray() ?? [];
             return {
-              x: x,
-              y: y,
-              type: 'scattergl',
-              mode: 'lines+markers',
               name: field.name,
-              line: {
-                color: colors[index % colors.length],
-                width: 2,
-              },
-              marker: {
-                size: 4,
-                color: colors[index % colors.length],
-              },
-            } as Data;
+              type: 'line',
+              showSymbol: false,
+              sampling: 'lttb',
+              samplingThreshold: 200,
+              data: timestamps.map((time, i) => [time, values[i]]),
+              progressive: 400,
+              progressiveThreshold: 3000,
+              large: true,
+              largeThreshold: 1000,
+              animation: false
+            };
           });
 
-          setPlotData(newPlotData);
+          chartInstance.current?.setOption({
+            animation: false,
+            tooltip: {
+              trigger: 'axis',
+              appendToBody: true
+            },
+            legend: {
+              type: 'scroll',
+              top: 0,
+              left: 50,
+              right: 50,
+              textStyle: {
+                color: theme.palette.text.primary
+              },
+              pageTextStyle: {
+                color: theme.palette.text.primary
+              },
+              pageIconColor: theme.palette.primary.main,
+              pageIconInactiveColor: theme.palette.action.disabled,
+              selectedMode: true
+            },
+            toolbox: {
+              feature: {
+                restore: {
+                  show: true,
+                  title: 'Reset Zoom'
+                }
+              },
+              iconStyle: {
+                borderColor: theme.palette.text.primary
+              },
+              emphasis: {
+                iconStyle: {
+                  borderColor: theme.palette.primary.main
+                }
+              }
+            },
+            xAxis: {
+              type: 'time'
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: series,
+            grid: {
+              left: '50px',
+              right: '50px',
+              top: '40px',
+              bottom: '80px',
+              containLabel: true
+            },
+            dataZoom: [{
+              id: "dataZoomX",
+              type: 'slider',
+              filterMode: 'weakFilter',
+              show: true,
+              xAxisIndex: [0],
+              bottom: 20,
+              height: 40,
+              borderColor: theme.palette.divider,
+              textStyle: {
+                color: theme.palette.text.primary
+              },
+              handleStyle: {
+                color: theme.palette.primary.main,
+                borderColor: theme.palette.primary.main
+              },
+              moveHandleStyle: {
+                color: theme.palette.primary.main
+              },
+              selectedDataBackground: {
+                lineStyle: {
+                  color: theme.palette.primary.main
+                },
+                areaStyle: {
+                  color: theme.palette.primary.main,
+                  opacity: 0.1
+                }
+              }
+            }]
+          });
         }
       } catch (error) {
         console.error('Error fetching CSV data:', error);
@@ -183,22 +216,11 @@ function Plotter() {
     }
 
     fetchData();
-  }, [loadCsvSettings]);
-
-  // Your existing video time handling useEffect...
-
-  const handleRelayout = (eventData: any) => {
-    if (eventData['xaxis.range[0]'] || eventData['xaxis.range[1]'] || eventData['xaxis.autorange']) {
-      setFollowVideo(false);
-    }
-  };
+  }, [loadCsvSettings, theme]);
 
   function addSeconds(date: Date, seconds: number) {
-    const newDate = new Date(date.getTime() + seconds * 1000);
-    return newDate;
+    return new Date(date.getTime() + seconds * 1000);
   }
-
-  if (!csvTable) return <div>Loading...</div>;
 
   return (
     <Box 
@@ -211,7 +233,7 @@ function Plotter() {
         bgcolor: theme.palette.background.default,
       }}
     >
-     <Box 
+      <Box 
         sx={{ 
           display: 'flex',
           justifyContent: 'flex-end',
@@ -264,49 +286,12 @@ function Plotter() {
         </Stack>
       </Box>
       <Box 
+        ref={chartRef}
         sx={{ 
-          position: 'relative',
           flex: 1,
-          '& .js-plotly-plot': {
-            width: '100% !important',
-            height: '100% !important'
-          }
+          width: '100%'
         }}
-      >
-        {plotData && 
-          <Box 
-            sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          >
-            <Plot
-              data={plotData}
-              layout={layout}
-              onRelayout={handleRelayout}
-              useResizeHandler
-              style={{ width: '100%', height: '100%' }}
-              config={{
-                responsive: true,
-                displayModeBar: true,
-                displaylogo: false,
-                modeBarButtonsToRemove: ['autoScale2d'],
-                plotlyServerURL: "",  // Prevents Plotly from trying to connect to their server
-                toImageButtonOptions: {
-                  format: 'svg',
-                  filename: 'plot',
-                  height: 1080,
-                  width: 1920,
-                  scale: 1
-                }
-              }}
-            />
-          </Box>
-        }
-      </Box>
+      />
     </Box>
   );
 }

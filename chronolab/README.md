@@ -42,6 +42,10 @@ On both the backend and the frontend we shall ignore timezones, because I don't 
 
 I spent probably an hour reading all the different Reddit posts about React UI frameworks, and tons of different reviews. After learning a plethora of novel insults, I decided that the community was as opinionated as they were divided on the issue. Given that this is a learning project and I've already learned TailwindCSS, I decided to try Material UI, which seemed to be a decent choice. I also tried Fluent UI, which I honestly liked the aesthetic better, but was fighting bugs for way too long and decided to pivot back to Material UI.
 
+### Plotting Library
+
+I originally wanted to use Ploty, but I ran into [a bug](https://community.plotly.com/t/webgl-is-not-supported-by-your-browser-for-scatter3d-on-safari-13-3-1-and-chrome-83-0-4103-106/41469) that stymied all of my forward progress. I pivoted to [Apache ECharts](https://dev.to/manufac/using-apache-echarts-with-react-and-typescript-353k) because it seems like it can handle large datasets, with similar customizability and interactivity to Plotly.
+
 ## Potential Features
 
 1. **Configuration File Saving Current Layout/Application State (loaded files, video section labeling, etc)**
@@ -80,9 +84,12 @@ I spent probably an hour reading all the different Reddit posts about React UI f
 1. Unselecting a column in the PlotSettings after the plot has loaded those settings breaks stuff.
 2. Selecting a new CSV file does not unload the old CSV file if one was already selected.
 3. <https://github.com/react-grid-layout/react-grid-layout/pull/2043>
+4. Plotly ScatterGL doesn't work for some reason.
+   1. <https://community.plotly.com/t/webgl-is-not-supported-by-your-browser-for-scatter3d-on-safari-13-3-1-and-chrome-83-0-4103-106/41469>
 
 ## Last Thing I Was Working On
 
+Create a successful production build with all the functionality currently implemented.
 Reimplement the second window functionality.
 Then keep working on plot functionality.
 After that comes video IOI tagging.

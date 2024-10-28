@@ -124,7 +124,7 @@ function VideoPlayer() {
           invoke('emit_video_time_change', { videoTime: currentTime });
         }
       }
-    }, 10); // Poll every 500 milliseconds
+    }, 250); // Poll every 500 milliseconds
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [lastTime]);
