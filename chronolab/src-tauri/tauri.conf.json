@@ -5,7 +5,7 @@
   "identifier": "com.chronolab.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420/app-windows/",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
   },
@@ -21,9 +21,14 @@
       
       "assetProtocol": {
         "enable": true,
-        "scope": []
+        "scope": ["**"]
       },
-      "csp": "default-src 'self' ipc: http://ipc.localhost; media-src 'self' asset: https://asset.localhost"
+      "csp": 
+        {
+          "default-src": "'self' ipc: http://ipc.localhost",
+          "media-src": "'self' asset: http://asset.localhost https://asset.localhost mediafile: *",
+          "style-src": "'self' 'unsafe-inline'"
+        }
     }
   },
   "bundle": {

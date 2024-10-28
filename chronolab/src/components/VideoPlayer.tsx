@@ -11,75 +11,97 @@ import {
   MediaSeekBackwardButton,
   MediaSeekForwardButton,
   MediaMuteButton,
+  MediaFullscreenButton,
 } from 'media-chrome/react';
+import { Container, Button, Box, Typography, TextField } from '@mui/material';
 import useGlobalState from "../hooks/useGlobalState";
-import { selectVideoFile } from "../utils/fileSelectors";
-import {z} from 'zod';
+import { Controller, useForm } from "react-hook-form";
+import { dateToUtcString, parseUtcString } from "../utils/datetimeHandlers";
+import { useFileOperations } from "../hooks/useFileOperations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { parseJSON } from "date-fns";
+import { z } from "zod";
 
-// This is used to validate the form inputs
-const videoStartTimeFormInputs = z.object({
-    video_start_time: z.preprocess(
-      // Doing this bullshit with the length because the html datetime-local element truncates seconds if they're 0 and we need those to parse properly.
-      (val) => (val == null || val === "" )  ? null : (parseJSON((val as string).length === 16 ? (val as string) + ":00" : (val as string))),
-      z.date().nullable()
-  ),
-})
+const videoStartTimeSchema = z.object({
+    video_start_time: z.string().min(1, "Video start time is required"),
+});
 
-type VideoStartTimeFormInputs = z.infer<typeof videoStartTimeFormInputs>;
-
-// ##############################################################################################################
-// Child Component
-// ##############################################################################################################
+type VideoStartTimeFormInputs = z.infer<typeof videoStartTimeSchema>;
 
 export function VideoStartTimeForm() {
-    const { videoStartTime, setVideoStartTime } = useGlobalState({videoStartTime: true, setOnly: false});
+  const { videoStartTime, setVideoStartTime } = useGlobalState({ videoStartTime: true, setOnly: false });
 
-    const { handleSubmit, register, formState: { errors } } = useForm<VideoStartTimeFormInputs>(
-      {
-        resolver: zodResolver(videoStartTimeFormInputs),
-        defaultValues: { video_start_time: videoStartTime }
+  const { control, handleSubmit, reset } = useForm<VideoStartTimeFormInputs>({
+    defaultValues: {
+        video_start_time: undefined
+    },
+    resolver: zodResolver(videoStartTimeSchema)
+});
+  // Set initial value when videoStartTime changes
+  useEffect(() => {
+      if (videoStartTime instanceof Date) {
+          reset({
+              video_start_time: dateToUtcString(videoStartTime) ?? undefined
+          });
       }
-    );
+  }, [videoStartTime, reset]);
 
-    const onFormSubmit = (data: VideoStartTimeFormInputs) => {
-      console.log("Video Start Time Form Submission Data:")
-      console.log("   Video Start Time:", data.video_start_time);
-      console.log("   Video Start Time Type:", typeof(data.video_start_time));
+  const onSubmit = (data: VideoStartTimeFormInputs) => {
+      // Convert the string to a Date object before saving to global state
+      const dateValue = data.video_start_time ? parseUtcString(data.video_start_time) : null;
+      
       if (setVideoStartTime) {
-        setVideoStartTime(data.video_start_time)
-      } else {
-        console.error("Unable to set the video start time due to an undefined global state setter.")
+          setVideoStartTime(dateValue);
       }
-      };
+  };
 
-    return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            {/* End Time */}
-            <div>
-                <label htmlFor="video_start_time">Input the Video Start Time</label>
-                <input
-                    id="video_start_time"
-                    type="datetime-local"
-                    step="1"
-                    {...register("video_start_time")}
-                />
-                {errors.video_start_time && <p>{errors.video_start_time.message}</p>}
-            </div>
+  return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+          <Box mb={3}>
+              <Typography variant="h6" gutterBottom>
+                  Input the Video Start Time
+              </Typography>
+              
+              <Controller
+                  name="video_start_time"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                      <TextField
+                          {...field}
+                          fullWidth
+                          type="datetime-local"
+                          label="Video Start Time"
+                          value={field.value ?? ''}
+                          slotProps={{
+                            htmlInput: { step: "1" },
+                            inputLabel: { shrink: true },
+                          }}
+                          error={!!error}
+                          helperText={error?.message}
+                      />
+                  )}
+              />
 
-            <button type="submit">Submit</button>
-        </form>
-    );
+          </Box>
+
+          <Box textAlign="center" mt={2}>
+              <Button 
+                  variant="contained" 
+                  color="primary" 
+                  type="submit"
+              >
+                  Set Video Start Time
+              </Button>
+          </Box>
+      </form>
+  );
 }
-
 
 
 
 function VideoPlayer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [lastTime, setLastTime] = useState<number | null>(null);
+  const { selectVideoFile } = useFileOperations();
   const {videoFilePath, setVideoFilePath, videoStartTime} = useGlobalState({videoFile: true, videoStartTime: true});
 
 
@@ -97,49 +119,81 @@ function VideoPlayer() {
         // Check if current time has changed
         if (lastTime !== currentTime) {
           setLastTime(currentTime); // Update last time
-          console.log(`Current Time: ${currentTime}`); // Log for debugging
 
           // Send current time to backend
           invoke('emit_video_time_change', { videoTime: currentTime });
         }
       }
-    }, 500); // Poll every 500 milliseconds
+    }, 250); // Poll every 500 milliseconds
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [lastTime]);
   
 
 
-  return (
-    <div className="container">
+  return  (
+    <Container>
+        <Box 
+            sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                mt: 4
+            }}
+        >
+            {videoFilePath ? (
+                <Box    
+                  sx={{
+                    width: '100%',
+                    height: "fit-content",
+                    clipPath: 'inset(0 round 16px)',
+                    boxShadow: 3, // Box shadow for elevation effect
+                }}>
+                    <MediaController>
+                        <video
+                            ref={videoRef}
+                            slot="media"
+                            src={convertFileSrc(videoFilePath)}
+                            preload="auto"
+                            muted
+                            crossOrigin=""
+                            style={{ width: '100%' }}
+                        />
+                        <MediaControlBar>
+                            <MediaPlayButton></MediaPlayButton>
+                            <MediaSeekBackwardButton></MediaSeekBackwardButton>
+                            <MediaSeekForwardButton></MediaSeekForwardButton>
+                            <MediaTimeRange></MediaTimeRange>
+                            <MediaTimeDisplay showDuration></MediaTimeDisplay>
+                            <MediaMuteButton></MediaMuteButton>
+                            <MediaVolumeRange></MediaVolumeRange>
+                            <MediaFullscreenButton></MediaFullscreenButton>
+                        </MediaControlBar>
+                    </MediaController>
+                </Box>
+            ) : (
+                <Box textAlign="center">
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                        No video file selected
+                    </Typography>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        onClick={() => selectVideoFile(setVideoFilePath)}
+                    >
+                        Select Video File
+                    </Button>
+                </Box>
+            )}
 
-      {videoFilePath ? (
-        <MediaController>
-          <video
-            ref={videoRef}
-            slot="media"
-            src={convertFileSrc(videoFilePath)}
-            preload="auto"
-            muted
-            crossOrigin=""
-          />
-          <MediaControlBar>
-            <MediaPlayButton></MediaPlayButton>
-            <MediaSeekBackwardButton></MediaSeekBackwardButton>
-            <MediaSeekForwardButton></MediaSeekForwardButton>
-            <MediaTimeRange></MediaTimeRange>
-            <MediaTimeDisplay showDuration></MediaTimeDisplay>
-            <MediaMuteButton></MediaMuteButton>
-            <MediaVolumeRange></MediaVolumeRange>
-          </MediaControlBar>
-        </MediaController>
-        ) : (
-          <button onClick={() => selectVideoFile(setVideoFilePath)}>Select Video File (Video Player Button)</button>
-        )
-      }
-      {!videoStartTime && <VideoStartTimeForm/>}
-
-    </div>
+            {!videoStartTime && (
+                <Box mt={4} width="100%">
+                    <VideoStartTimeForm />
+                </Box>
+            )}
+        </Box>
+    </Container>
   );
 }
 
