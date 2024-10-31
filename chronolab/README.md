@@ -2,15 +2,15 @@
 
 Chronolab is an application that is designed to allow for visualization of lab video and lab data concurrently, as if you were in the lab live, day-of, watching video and data stream in on your screens.
 
-## Proof-Of-Concept
+## MVP Release
 
-The proof-of-concept release on GitHub works in the dev mode on Windows. You need to select the uneditted example dataset, and any random video. Start the dev build with `pnpm tauri dev`, click `load video` and select a video, click `load csv` and select a csv file, then open the plot. Press play on the video and the plot should move as the time in the video moves.
+The MVP release build 
 
 ## Design Decisions
 
 ### Frontend vs. Backend CSV Data Handling
 
-Given the added complexity of having the backend handle all the data, it makes more sense to create a full Plotly figure with all the data that it needs and then simply change the axes bounds on that figure as the video changes. I can additionally add a [range slider](https://plotly.com/javascript/time-series/#time-series-with-rangeslider) to allow the user to more easily navigate through the full data of the plot. If I run into performance issues with the plot, I can look into [Plotly Resampler](https://github.com/predict-idlab/plotly-resampler) and implementing [tsdownsample](https://github.com/predict-idlab/tsdownsample) on my own. There should not be that big of a performance issue with implementing that since the downsampling will greatly limit the size of the data being passed to the frontend.
+Originally I had the backend load the CSV using Polars and send it to the frontend using an IPC buffer. This was because I wanted to have the data on the backend so that I could use [tsdownsample](https://github.com/predict-idlab/tsdownsample) to mimic the functionality of [Plotly Resampler](https://github.com/predict-idlab/plotly-resampler) when I was using Plotly. This became a vestigial design decision after pivoting to Apache ECharts, since that plotting library already enables downsampling. Thus, depending on the performance of JS .csv parsers (assuming they exist), it might make sense to redesign this application to completely handle the CSV data on the front end.  
 
 ### Frontend vs. Backend State
 
@@ -91,10 +91,10 @@ I originally wanted to use Ploty, but I ran into [a bug](https://community.plotl
 3. <https://github.com/react-grid-layout/react-grid-layout/pull/2043>
 4. After adding Apache Echarts I can no longer resize the individual plot and video windows.
    1. The Apache EChart will not resize if the application window is resized by clicking the expand button, but if it's dragged it works
-
+5. Too many traces on the plot will cause the legend to overflow
+6. There are issues with the plot and dark/light mode compatibility and text visibility
 
 ## Last Thing I Was Working On
 
-Create a successful production build with all the functionality currently implemented.
 Reimplement the second window functionality.
 After that comes video IOI tagging.
