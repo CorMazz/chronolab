@@ -6,6 +6,8 @@ Chronolab is an application that is designed to allow for visualization of lab v
 
 The MVP release build is a working minimum viable product of Chronolab.
 
+https://github.com/user-attachments/assets/ee338210-2bcf-422e-b87b-5cc40037a432
+
 [Video](https://www.youtube.com/watch?v=VLpClJHT9bQ) and [data](https://www.kaggle.com/datasets/ecoco2/household-appliances-power-consumption) used in the demo.
 
 ## Contributing
