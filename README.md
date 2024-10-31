@@ -4,7 +4,7 @@ Chronolab is an application that is designed to allow for visualization of lab v
 
 ## MVP Release Demo
 
-The MVP release build is a working minimum viable product of Chronolab.
+The MVP release build is a working minimum viable product of Chronolab. The demo video shows the included funcitonality with some random data and video from YouTube. As evident from the demo, the plot follows the video and displays the data "live" as if you were in the lab recording data. This allows for easier data exploration when trying to understand how the data traces correspond to the video. 
 
 https://github.com/user-attachments/assets/ee338210-2bcf-422e-b87b-5cc40037a432
 
